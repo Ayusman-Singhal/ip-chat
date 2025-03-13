@@ -527,10 +527,7 @@ def client():
                     let currentUsername = '';
                     let processedMessageIds = new Set(); // Track message IDs to prevent duplicates
 
-                    // Auto-fill server address with current host
-                    const serverHost = window.location.host;
-                    const serverProtocol = window.location.protocol;
-                    serverAddressInput.value = `${serverProtocol}//${serverHost}`;
+                    serverAddressInput.value = `https://ip-chat.onrender.com`;
 
                     // Event Listeners
                     connectBtn.addEventListener('click', connectToServer);
