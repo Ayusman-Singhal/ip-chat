@@ -73,11 +73,17 @@ def connect(sid, environ):
         'ip': client_ip
     }
     
+    # Calculate current timestamp
+    now = datetime.now()
+    timestamp = now.strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
     # Send welcome message and notify others
     welcome_msg = {
         'type': 'system',
         'text': f"Welcome to the chat, {clients[sid]['username']}! Type /clear to clear your chat history.",
-        'timestamp': datetime.now().strftime("%H:%M:%S")
+        'timestamp': timestamp,
+        'id': f"welcome_{sid}_{time_ms}"
     }
     sio.emit('message', welcome_msg, room=sid)
     
@@ -87,7 +93,8 @@ def connect(sid, environ):
         history_notice = {
             'type': 'system',
             'text': f"Showing last {len(recent_history)} messages",
-            'timestamp': datetime.now().strftime("%H:%M:%S")
+            'timestamp': timestamp,
+            'id': f"history_notice_{sid}_{time_ms}"
         }
         sio.emit('message', history_notice, room=sid)
         
@@ -98,7 +105,8 @@ def connect(sid, environ):
     join_msg = {
         'type': 'system',
         'text': f"{clients[sid]['username']} has joined the chat",
-        'timestamp': datetime.now().strftime("%H:%M:%S")
+        'timestamp': timestamp,
+        'id': f"join_{sid}_{time_ms}"
     }
     sio.emit('message', join_msg, skip_sid=sid)
     
@@ -117,11 +125,16 @@ def disconnect(sid):
         username = clients[sid]['username']
         logger.info(f"Client disconnected: {username} ({sid})")
         
+        # Get current timestamp
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        time_ms = int(time.time() * 1000)
+        
         # Notify remaining users
         leave_msg = {
             'type': 'system',
             'text': f"{username} has left the chat",
-            'timestamp': datetime.now().strftime("%H:%M:%S")
+            'timestamp': timestamp,
+            'id': f"leave_{sid}_{time_ms}"
         }
         sio.emit('message', leave_msg)
         
@@ -150,17 +163,23 @@ def chat_message(sid, data):
             'type': 'system',
             'text': "Chat history cleared for you",
             'timestamp': datetime.now().strftime("%H:%M:%S"),
-            'clear': True  # Special flag for client to clear history
+            'clear': True,  # Special flag for client to clear history
+            'id': f"clear_{sid}_{int(time.time()*1000)}"  # Add unique ID
         }
         sio.emit('message', clear_msg, room=sid)
         return
+    
+    # Generate a timestamp for the message
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    message_time = int(time.time() * 1000)  # Milliseconds since epoch
     
     # Create message object
     msg = {
         'type': 'chat',
         'username': username,
         'text': text,
-        'timestamp': datetime.now().strftime("%H:%M:%S")
+        'timestamp': timestamp,
+        'id': f"msg_{message_time}_{sid}"  # Add unique ID
     }
     
     # Add to history and limit size
@@ -190,11 +209,16 @@ def set_username(sid, data):
     # Update username
     clients[sid]['username'] = new_username
     
+    # Get current timestamp
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
     # Notify all users about the change
     change_msg = {
         'type': 'system',
         'text': f"{old_username} changed their name to {new_username}",
-        'timestamp': datetime.now().strftime("%H:%M:%S")
+        'timestamp': timestamp,
+        'id': f"rename_{sid}_{time_ms}"
     }
     sio.emit('message', change_msg)
     
@@ -501,6 +525,7 @@ def client():
                     let socket;
                     let connected = false;
                     let currentUsername = '';
+                    let processedMessageIds = new Set(); // Track message IDs to prevent duplicates
 
                     // Auto-fill server address with current host
                     serverAddressInput.value = window.location.origin;
@@ -561,7 +586,7 @@ def client():
                                 statusText.textContent = 'Connected';
 
                                 // Add initial system message
-                                addSystemMessage('Connected to server');
+                                addSystemMessage('Connected to server', 'connect_' + Date.now());
                             });
 
                             socket.on('disconnect', function() {
@@ -653,19 +678,45 @@ def client():
                         socket.emit('set_username', { username: newUsername });
                     }
 
-                    function addSystemMessage(text) {
+                    function addSystemMessage(text, messageId) {
+                        // Create unique ID if not provided
+                        const id = messageId || 'sys_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        
+                        // Check if we've already processed this message
+                        if (processedMessageIds.has(id)) {
+                            console.log('Skipping duplicate system message:', id);
+                            return;
+                        }
+                        
+                        // Mark as processed
+                        processedMessageIds.add(id);
+                        
                         const messageElem = document.createElement('div');
                         messageElem.className = 'message message-system';
+                        messageElem.dataset.messageId = id;
                         messageElem.textContent = text;
                         chatMessages.appendChild(messageElem);
                         scrollToBottom();
                     }
 
                     function addChatMessage(message) {
+                        // Generate or use message ID
+                        const id = message.id || `msg_${message.timestamp}_${message.username}_${message.text.substr(0, 10)}`;
+                        
+                        // Check if we've already processed this message
+                        if (processedMessageIds.has(id)) {
+                            console.log('Skipping duplicate chat message:', id);
+                            return;
+                        }
+                        
+                        // Mark as processed
+                        processedMessageIds.add(id);
+                        
                         const isMine = message.username === currentUsername;
                         
                         const messageElem = document.createElement('div');
                         messageElem.className = isMine ? 'message message-mine' : 'message message-other';
+                        messageElem.dataset.messageId = id;
                         
                         const headerElem = document.createElement('div');
                         headerElem.className = 'message-header';
@@ -713,12 +764,22 @@ def client():
                     }
 
                     function clearChatHistory() {
+                        // Don't clear processedMessageIds - that's our duplicate prevention mechanism
+                        
                         // Keep only the welcome message
                         const welcomeMessage = chatMessages.querySelector('.message-system');
                         chatMessages.innerHTML = '';
                         if (welcomeMessage) {
                             chatMessages.appendChild(welcomeMessage);
                         }
+                    }
+
+                    // Add function to handle server disconnect and reconnect
+                    function handleServerReconnect() {
+                        // Don't clear message IDs so we can prevent duplicates on reconnect
+                        // But we should clear the visible messages to avoid confusion
+                        clearChatHistory();
+                        addSystemMessage('Reconnected to server. History will be restored.');
                     }
                 </script>
             </body>
