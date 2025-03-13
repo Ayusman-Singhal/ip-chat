@@ -231,9 +231,455 @@ def index():
 @app.route('/client')
 def client():
     """Serve the client page"""
-    with open(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'client', 'index.html'), 'r') as f:
-        content = f.read()
-    return content
+    try:
+        # Log the current path to help debug
+        client_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'client', 'index.html')
+        logger.info(f"Attempting to read client from: {client_path}")
+        
+        # Check if the file exists
+        if not os.path.exists(client_path):
+            logger.error(f"Client file not found at: {client_path}")
+            
+            # Try an alternative path directly in the app directory
+            alt_path = os.path.join(os.path.dirname(__file__), 'client.html')
+            if os.path.exists(alt_path):
+                logger.info(f"Found client at alternative path: {alt_path}")
+                with open(alt_path, 'r') as f:
+                    content = f.read()
+                return content
+            
+            # If still not found, embed a basic client directly
+            logger.info("Serving embedded client HTML")
+            return """
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>IP Chat</title>
+                <style>
+                    :root {
+                        --primary-color: #4a6fa5;
+                        --secondary-color: #6c8ebd;
+                        --background-color: #f5f5f5;
+                        --chat-bg: #ffffff;
+                        --text-color: #333333;
+                        --system-msg-color: #6c757d;
+                        --my-msg-bg: #e3f2fd;
+                        --other-msg-bg: #f8f9fa;
+                        --border-color: #dee2e6;
+                    }
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body {
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        background-color: var(--background-color);
+                        color: var(--text-color);
+                        line-height: 1.6;
+                        height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    header {
+                        background-color: var(--primary-color);
+                        color: white;
+                        padding: 1rem;
+                        text-align: center;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    }
+                    .main-container {
+                        display: flex;
+                        flex: 1;
+                        overflow: hidden;
+                    }
+                    .sidebar {
+                        width: 250px;
+                        background-color: white;
+                        border-right: 1px solid var(--border-color);
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .chat-container {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        overflow: hidden;
+                    }
+                    .connection-panel, .username-panel {
+                        padding: 1rem;
+                        background-color: white;
+                        border-bottom: 1px solid var(--border-color);
+                    }
+                    .form-group {
+                        margin-bottom: 1rem;
+                    }
+                    label {
+                        display: block;
+                        margin-bottom: 0.5rem;
+                        font-weight: 500;
+                    }
+                    input, button {
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        font-size: 1rem;
+                    }
+                    button {
+                        background-color: var(--primary-color);
+                        color: white;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .chat-messages {
+                        flex: 1;
+                        padding: 1rem;
+                        overflow-y: auto;
+                        background-color: var(--chat-bg);
+                    }
+                    .chat-input {
+                        display: flex;
+                        padding: 1rem;
+                        background-color: white;
+                        border-top: 1px solid var(--border-color);
+                    }
+                    .chat-input input {
+                        flex: 1;
+                        margin-right: 0.5rem;
+                    }
+                    .chat-input button {
+                        width: auto;
+                    }
+                    .message {
+                        margin-bottom: 1rem;
+                        padding: 0.75rem;
+                        border-radius: 4px;
+                    }
+                    .message-system {
+                        background-color: #f8f9fa;
+                        color: var(--system-msg-color);
+                        text-align: center;
+                        font-style: italic;
+                    }
+                    .message-mine {
+                        background-color: var(--my-msg-bg);
+                        margin-left: 2rem;
+                    }
+                    .message-other {
+                        background-color: var(--other-msg-bg);
+                        margin-right: 2rem;
+                    }
+                    .message-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 0.5rem;
+                        font-size: 0.875rem;
+                    }
+                    .message-username {
+                        font-weight: bold;
+                    }
+                    .message-timestamp {
+                        color: var(--system-msg-color);
+                    }
+                    .users {
+                        list-style: none;
+                    }
+                    .users li {
+                        padding: 0.5rem 1rem;
+                        border-bottom: 1px solid var(--border-color);
+                    }
+                    @media (max-width: 768px) {
+                        .main-container {
+                            flex-direction: column;
+                        }
+                        .sidebar {
+                            width: 100%;
+                            max-height: 50%;
+                        }
+                    }
+                </style>
+            </head>
+            <body>
+                <header>
+                    <h1>IP Chat</h1>
+                </header>
+                <div class="main-container">
+                    <div class="sidebar" id="sidebar">
+                        <div class="connection-panel">
+                            <div class="form-group">
+                                <label for="server-address">Server Address:</label>
+                                <input type="text" id="server-address" placeholder="Enter IP address or hostname:port">
+                            </div>
+                            <div class="form-group">
+                                <button id="connect-btn">Connect</button>
+                                <button id="disconnect-btn" style="display: none;">Disconnect</button>
+                            </div>
+                            <div class="form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" id="username" placeholder="Enter username" disabled>
+                                <button id="change-username-btn" disabled>Change</button>
+                            </div>
+                        </div>
+                        <div class="status-bar">
+                            <div id="status-indicator"></div>
+                            <span id="status-text">Disconnected</span>
+                        </div>
+                        <div class="user-list">
+                            <h3>Online Users (0)</h3>
+                            <ul class="users" id="users-list"></ul>
+                        </div>
+                    </div>
+                    <div class="chat-container">
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message message-system">
+                                Welcome to IP Chat! Connect to a server to start chatting.
+                            </div>
+                        </div>
+                        <div class="chat-input">
+                            <input type="text" id="message-input" placeholder="Type a message..." disabled>
+                            <button id="send-btn" disabled>Send</button>
+                        </div>
+                    </div>
+                </div>
+                <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+                <script>
+                    // DOM Elements
+                    const serverAddressInput = document.getElementById('server-address');
+                    const connectBtn = document.getElementById('connect-btn');
+                    const disconnectBtn = document.getElementById('disconnect-btn');
+                    const usernameInput = document.getElementById('username');
+                    const changeUsernameBtn = document.getElementById('change-username-btn');
+                    const statusIndicator = document.getElementById('status-indicator');
+                    const statusText = document.getElementById('status-text');
+                    const usersList = document.getElementById('users-list');
+                    const chatMessages = document.getElementById('chat-messages');
+                    const messageInput = document.getElementById('message-input');
+                    const sendBtn = document.getElementById('send-btn');
+
+                    // Variables
+                    let socket;
+                    let connected = false;
+                    let currentUsername = '';
+
+                    // Auto-fill server address with current host
+                    serverAddressInput.value = window.location.origin;
+
+                    // Event Listeners
+                    connectBtn.addEventListener('click', connectToServer);
+                    disconnectBtn.addEventListener('click', handleDisconnect);
+                    changeUsernameBtn.addEventListener('click', changeUsername);
+                    sendBtn.addEventListener('click', sendMessage);
+                    messageInput.addEventListener('keypress', function(e) {
+                        if (e.key === 'Enter') sendMessage();
+                    });
+
+                    // Function to connect to the server
+                    function connectToServer() {
+                        const serverAddress = serverAddressInput.value.trim();
+                        if (!serverAddress) {
+                            alert('Please enter a server address');
+                            return;
+                        }
+
+                        connectBtn.disabled = true;
+                        statusText.textContent = 'Connecting...';
+
+                        try {
+                            socket = io(serverAddress);
+
+                            socket.on('connect', function() {
+                                connected = true;
+                                connectBtn.style.display = 'none';
+                                disconnectBtn.style.display = 'block';
+                                usernameInput.disabled = false;
+                                changeUsernameBtn.disabled = false;
+                                messageInput.disabled = false;
+                                sendBtn.disabled = false;
+
+                                statusIndicator.className = 'status-indicator status-connected';
+                                statusText.textContent = 'Connected';
+
+                                // Add initial system message
+                                addSystemMessage('Connected to server');
+                            });
+
+                            socket.on('disconnect', function() {
+                                handleDisconnect();
+                                addSystemMessage('Disconnected from server');
+                            });
+
+                            // Chat events
+                            socket.on('message', function(message) {
+                                if (message.type === 'system') {
+                                    if (message.clear) {
+                                        clearChatHistory();
+                                        addSystemMessage(message.text);
+                                    } else {
+                                        addSystemMessage(message.text);
+                                    }
+                                } else if (message.type === 'chat') {
+                                    addChatMessage(message);
+                                }
+                            });
+
+                            socket.on('user_list', function(data) {
+                                updateUserList(data.users);
+                            });
+
+                            socket.on('username_changed', function(data) {
+                                currentUsername = data.username;
+                                usernameInput.value = currentUsername;
+                            });
+
+                            socket.on('username_error', function(data) {
+                                alert(data.error);
+                            });
+
+                        } catch (error) {
+                            console.error('Error connecting to server:', error);
+                            handleDisconnect();
+                            alert('Failed to connect to server. Please check the address and try again.');
+                        }
+                    }
+
+                    function handleDisconnect() {
+                        connected = false;
+                        connectBtn.style.display = 'block';
+                        disconnectBtn.style.display = 'none';
+                        connectBtn.disabled = false;
+                        usernameInput.disabled = true;
+                        changeUsernameBtn.disabled = true;
+                        messageInput.disabled = true;
+                        sendBtn.disabled = true;
+
+                        statusIndicator.className = 'status-indicator status-disconnected';
+                        statusText.textContent = 'Disconnected';
+
+                        currentUsername = '';
+                        usernameInput.value = '';
+                        
+                        // Clear user list
+                        usersList.innerHTML = '';
+                        
+                        if (socket) {
+                            socket.disconnect();
+                            socket = null;
+                        }
+                    }
+
+                    function sendMessage() {
+                        if (!connected) return;
+
+                        const text = messageInput.value.trim();
+                        if (!text) return;
+
+                        // Send the message to the server
+                        socket.emit('chat_message', { text });
+
+                        // Clear input field
+                        messageInput.value = '';
+                    }
+
+                    function changeUsername() {
+                        if (!connected) return;
+
+                        const newUsername = usernameInput.value.trim();
+                        if (!newUsername) {
+                            alert('Username cannot be empty');
+                            return;
+                        }
+
+                        socket.emit('set_username', { username: newUsername });
+                    }
+
+                    function addSystemMessage(text) {
+                        const messageElem = document.createElement('div');
+                        messageElem.className = 'message message-system';
+                        messageElem.textContent = text;
+                        chatMessages.appendChild(messageElem);
+                        scrollToBottom();
+                    }
+
+                    function addChatMessage(message) {
+                        const isMine = message.username === currentUsername;
+                        
+                        const messageElem = document.createElement('div');
+                        messageElem.className = isMine ? 'message message-mine' : 'message message-other';
+                        
+                        const headerElem = document.createElement('div');
+                        headerElem.className = 'message-header';
+                        
+                        const usernameElem = document.createElement('span');
+                        usernameElem.className = 'message-username';
+                        usernameElem.textContent = message.username;
+                        
+                        const timestampElem = document.createElement('span');
+                        timestampElem.className = 'message-timestamp';
+                        timestampElem.textContent = message.timestamp;
+                        
+                        headerElem.appendChild(usernameElem);
+                        headerElem.appendChild(timestampElem);
+                        
+                        const textElem = document.createElement('div');
+                        textElem.className = 'message-text';
+                        textElem.textContent = message.text;
+                        
+                        messageElem.appendChild(headerElem);
+                        messageElem.appendChild(textElem);
+                        
+                        chatMessages.appendChild(messageElem);
+                        scrollToBottom();
+                    }
+
+                    function updateUserList(users) {
+                        usersList.innerHTML = '';
+                        
+                        const usersHeading = document.querySelector('.user-list h3');
+                        usersHeading.textContent = `Online Users (${users.length})`;
+                        
+                        users.forEach(user => {
+                            const li = document.createElement('li');
+                            li.textContent = user.username;
+                            if (user.username === currentUsername) {
+                                li.style.fontWeight = 'bold';
+                            }
+                            usersList.appendChild(li);
+                        });
+                    }
+
+                    function scrollToBottom() {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+
+                    function clearChatHistory() {
+                        // Keep only the welcome message
+                        const welcomeMessage = chatMessages.querySelector('.message-system');
+                        chatMessages.innerHTML = '';
+                        if (welcomeMessage) {
+                            chatMessages.appendChild(welcomeMessage);
+                        }
+                    }
+                </script>
+            </body>
+            </html>
+            """
+        
+        # Normal path handling if file exists
+        with open(client_path, 'r') as f:
+            content = f.read()
+        return content
+    except Exception as e:
+        logger.error(f"Error serving client: {e}")
+        # Return an error message instead of failing
+        return f"""
+        <html>
+        <head><title>Client Error</title></head>
+        <body>
+            <h1>Error loading chat client</h1>
+            <p>There was an error loading the chat client: {str(e)}</p>
+            <p>Please contact the administrator.</p>
+        </body>
+        </html>
+        """
 
 @app.route('/stats')
 def stats():
