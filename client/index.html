@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Chat</title>
+    <style>
+        :root {
+            --primary-color: #4a6fa5;
+            --secondary-color: #6c8ebd;
+            --background-color: #f5f5f5;
+            --chat-bg: #ffffff;
+            --text-color: #333333;
+            --system-msg-color: #6c757d;
+            --my-msg-bg: #e3f2fd;
+            --other-msg-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: white;
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .connection-panel {
+            padding: 1rem;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .status-bar {
+            padding: 0.5rem 1rem;
+            background-color: #e9ecef;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-connected {
+            background-color: #28a745;
+        }
+
+        .status-disconnected {
+            background-color: #dc3545;
+        }
+
+        .status-connecting {
+            background-color: #ffc107;
+        }
+
+        .user-list {
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .user-list h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .users {
+            list-style: none;
+        }
+
+        .user-item {
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .user-item:hover {
+            background-color: var(--background-color);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            background-color: var(--chat-bg);
+        }
+
+        .message {
+            margin-bottom: 1rem;
+            max-width: 85%;
+            word-wrap: break-word;
+        }
+
+        .message-system {
+            color: var(--system-msg-color);
+            font-style: italic;
+            text-align: center;
+            margin: 0.5rem 0;
+        }
+
+        .message-other {
+            margin-right: auto;
+            background-color: var(--other-msg-bg);
+            border-radius: 12px 12px 12px 0;
+            padding: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message-mine {
+            margin-left: auto;
+            background-color: var(--my-msg-bg);
+            border-radius: 12px 12px 0 12px;
+            padding: 0.75rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+            font-size: 0.85rem;
+        }
+
+        .message-sender {
+            font-weight: 500;
+        }
+
+        .message-time {
+            color: var(--system-msg-color);
+            font-size: 0.75rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+        }
+
+        .chat-input input {
+            flex: 1;
+            margin-right: 0.5rem;
+        }
+
+        .chat-input button {
+            width: auto;
+            padding: 0.75rem 1.5rem;
+            margin-top: 0;
+        }
+
+        .username-panel {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 1.5rem;
+            text-align: center;
+            line-height: 50px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%);
+                z-index: 1000;
+                box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .mobile-toggle {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IP Chat</h1>
+    </header>
+
+    <div class="main-container">
+        <div class="sidebar" id="sidebar">
+            <div class="connection-panel">
+                <div class="form-group">
+                    <label for="server-address">Server Address:</label>
+                    <input type="text" id="server-address" placeholder="Enter IP address or hostname:port">
+                </div>
+                <div class="form-group">
+                    <button id="connect-btn">Connect</button>
+                    <button id="disconnect-btn" style="display: none;">Disconnect</button>
+                </div>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter username" disabled>
+                    <button id="change-username-btn" disabled>Change</button>
+                </div>
+                <div class="network-help">
+                    <p>Need help connecting across networks? <br>
+                    When connected, visit <a href="#" id="help-link" target="_blank">Network Help</a></p>
+                </div>
+            </div>
+            <div class="username-panel">
+                <div class="form-group">
+                    <label for="username">Your Username:</label>
+                    <input type="text" id="username" disabled placeholder="Not connected">
+                </div>
+                <button id="change-username-btn" disabled>Change Username</button>
+            </div>
+            <div class="status-bar">
+                <div class="status-indicator status-disconnected" id="status-indicator"></div>
+                <span id="status-text">Disconnected</span>
+            </div>
+            <div class="user-list">
+                <h3>Online Users (0)</h3>
+                <ul class="users" id="users-list">
+                    <!-- Users will be added here dynamically -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added here dynamically -->
+                <div class="message message-system">
+                    Welcome to IP Chat! Connect to a server to start chatting.
+                </div>
+            </div>
+            <div class="chat-input">
+                <input type="text" id="message-input" placeholder="Type a message..." disabled>
+                <button id="send-btn" disabled>Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="mobile-toggle" id="mobile-toggle">☰</div>
+
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        // DOM Elements
+        const serverAddressInput = document.getElementById('server-address');
+        const connectBtn = document.getElementById('connect-btn');
+        const disconnectBtn = document.getElementById('disconnect-btn');
+        const usernameInput = document.getElementById('username');
+        const changeUsernameBtn = document.getElementById('change-username-btn');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const usersList = document.getElementById('users-list');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const sidebar = document.getElementById('sidebar');
+
+        // Variables
+        let socket;
+        let connected = false;
+        let currentUsername = '';
+
+        // Functions
+        function connect() {
+            if (connected) return;
+
+            let serverAddress = serverAddressInput.value.trim();
+            if (!serverAddress) {
+                alert('Please enter a server address');
+                return;
+            }
+
+            // Add http:// prefix if not present
+            if (!serverAddress.startsWith('http://') && !serverAddress.startsWith('https://')) {
+                serverAddress = 'http://' + serverAddress;
+            }
+
+            // Update UI
+            connectBtn.disabled = true;
+            statusIndicator.className = 'status-indicator status-connecting';
+            statusText.textContent = 'Connecting...';
+
+            try {
+                // Connect to Socket.IO server
+                socket = io(serverAddress);
+
+                // Socket connection events
+                socket.on('connect', function() {
+                    connected = true;
+                    connectBtn.style.display = 'none';
+                    disconnectBtn.style.display = 'block';
+                    usernameInput.disabled = false;
+                    changeUsernameBtn.disabled = false;
+                    messageInput.disabled = false;
+                    sendBtn.disabled = false;
+
+                    statusIndicator.className = 'status-indicator status-connected';
+                    statusText.textContent = 'Connected';
+
+                    // Add initial system message
+                    addSystemMessage('Connected to server');
+
+                    // Update help link
+                    updateHelpLink();
+                });
+
+                socket.on('disconnect', function() {
+                    handleDisconnect();
+                    addSystemMessage('Disconnected from server');
+
+                    // Update help link
+                    updateHelpLink();
+                });
+
+                socket.on('connect_error', function(error) {
+                    console.error('Connection error:', error);
+                    handleDisconnect();
+                    alert('Failed to connect to server. Please check the address and try again.');
+
+                    // Update help link
+                    updateHelpLink();
+                });
+
+                // Chat events
+                socket.on('message', function(message) {
+                    handleIncomingMessage(message);
+                });
+
+                socket.on('user_list', function(data) {
+                    updateUserList(data.users);
+                });
+
+                socket.on('username_changed', function(data) {
+                    currentUsername = data.username;
+                    usernameInput.value = currentUsername;
+                });
+
+                socket.on('username_error', function(data) {
+                    alert(data.error);
+                });
+
+            } catch (error) {
+                console.error('Error connecting to server:', error);
+                handleDisconnect();
+                alert('Failed to connect to server. Please check the address and try again.');
+
+                // Update help link
+                updateHelpLink();
+            }
+        }
+
+        function handleDisconnect() {
+            connected = false;
+            connectBtn.style.display = 'block';
+            disconnectBtn.style.display = 'none';
+            connectBtn.disabled = false;
+            usernameInput.disabled = true;
+            changeUsernameBtn.disabled = true;
+            messageInput.disabled = true;
+            sendBtn.disabled = true;
+
+            statusIndicator.className = 'status-indicator status-disconnected';
+            statusText.textContent = 'Disconnected';
+
+            currentUsername = '';
+            usernameInput.value = '';
+            
+            // Clear user list
+            usersList.innerHTML = '';
+            
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+
+            // Update help link
+            updateHelpLink();
+        }
+
+        function sendMessage() {
+            if (!connected) return;
+
+            const text = messageInput.value.trim();
+            if (!text) return;
+
+            // Send the message to the server
+            socket.emit('chat_message', { text });
+
+            // Clear input field
+            messageInput.value = '';
+        }
+
+        function changeUsername() {
+            if (!connected) return;
+
+            const newUsername = usernameInput.value.trim();
+            if (!newUsername) {
+                alert('Username cannot be empty');
+                return;
+            }
+
+            socket.emit('set_username', { username: newUsername });
+        }
+
+        function handleIncomingMessage(message) {
+            if (message.type === 'system') {
+                // Check if this is a clear command
+                if (message.clear) {
+                    clearChatHistory();
+                    addSystemMessage(message.text);
+                } else {
+                    addSystemMessage(message.text);
+                }
+            } else if (message.type === 'chat') {
+                addChatMessage(message);
+            }
+        }
+
+        function addSystemMessage(text) {
+            const messageElem = document.createElement('div');
+            messageElem.className = 'message message-system';
+            messageElem.textContent = text;
+            chatMessages.appendChild(messageElem);
+            scrollToBottom();
+        }
+
+        function addChatMessage(message) {
+            const isMine = message.username === currentUsername;
+            
+            const messageElem = document.createElement('div');
+            messageElem.className = isMine ? 'message message-mine' : 'message message-other';
+            
+            const headerElem = document.createElement('div');
+            headerElem.className = 'message-header';
+            
+            const senderElem = document.createElement('span');
+            senderElem.className = 'message-sender';
+            senderElem.textContent = message.username;
+            
+            const timeElem = document.createElement('span');
+            timeElem.className = 'message-time';
+            timeElem.textContent = message.timestamp;
+            
+            headerElem.appendChild(senderElem);
+            headerElem.appendChild(timeElem);
+            
+            const contentElem = document.createElement('div');
+            contentElem.className = 'message-content';
+            contentElem.textContent = message.text;
+            
+            messageElem.appendChild(headerElem);
+            messageElem.appendChild(contentElem);
+            
+            chatMessages.appendChild(messageElem);
+            scrollToBottom();
+        }
+
+        function updateUserList(users) {
+            // Clear current list
+            usersList.innerHTML = '';
+            
+            // Update header
+            const userCount = document.querySelector('.user-list h3');
+            userCount.textContent = `Online Users (${users.length})`;
+            
+            // Add each user
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.className = 'user-item';
+                li.textContent = user.username;
+                
+                // Highlight current user
+                if (user.username === currentUsername) {
+                    li.style.fontWeight = 'bold';
+                }
+                
+                usersList.appendChild(li);
+            });
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function clearChatHistory() {
+            // Keep only the welcome message
+            const welcomeMessage = chatMessages.querySelector('.message-system');
+            chatMessages.innerHTML = '';
+            if (welcomeMessage) {
+                chatMessages.appendChild(welcomeMessage);
+            }
+        }
+
+        // Update the help link when connected
+        function updateHelpLink() {
+            const helpLink = document.getElementById('help-link');
+            if (connected && socket) {
+                const serverUrl = socket.io.uri;
+                helpLink.href = serverUrl + '/help';
+                helpLink.style.color = '#4a6fa5';
+                helpLink.style.pointerEvents = 'auto';
+            } else {
+                helpLink.href = '#';
+                helpLink.style.color = '#999';
+                helpLink.style.pointerEvents = 'none';
+            }
+        }
+
+        // Event Listeners
+        connectBtn.addEventListener('click', connect);
+        disconnectBtn.addEventListener('click', handleDisconnect);
+        
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        changeUsernameBtn.addEventListener('click', changeUsername);
+        
+        mobileToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', function(e) {
+            if (window.innerWidth <= 768 && sidebar.classList.contains('active')) {
+                if (!sidebar.contains(e.target) && e.target !== mobileToggle) {
+                    sidebar.classList.remove('active');
+                }
+            }
+        });
+
+        // Initialize
+        serverAddressInput.value = window.location.hostname.replace('localhost', '127.0.0.1') + ':5000';
+
+        // Initialize the help link
+        updateHelpLink();
+    </script>
+</body>
+</html> 

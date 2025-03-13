@@ -1,0 +1,5 @@
+flask==2.3.3
+python-socketio==5.10.0
+eventlet==0.34.2
+requests==2.31.0
+python-engineio==4.8.0 
