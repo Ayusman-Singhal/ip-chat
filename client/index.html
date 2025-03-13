@@ -506,6 +506,8 @@
         let activeChatTab = 'global'; // 'global' or 'private'
         let activeChatPartner = null; // For private chat
         let privateChatInvitations = new Map(); // Store pending invitations
+        let sentInvitations = new Map(); // Track sent invitations
+        let invitationCooldowns = new Map(); // Track cooldown periods for invitations
 
         // Auto-fill server address based on current URL
         const currentUrl = window.location.href;
@@ -651,6 +653,22 @@
                 
                 socket.on('private_chat_accepted', function(data) {
                     addPrivateSystemMessage(data.text);
+                    // Clear the sent invitation status
+                    sentInvitations.delete(data.target_sid);
+                });
+
+                socket.on('private_chat_declined', function(data) {
+                    // Handle declined invitation
+                    addPrivateSystemMessage(data.text);
+                    
+                    // Set a cooldown period before allowing to send another invitation
+                    const declinedBy = data.declined_by;
+                    if (declinedBy) {
+                        invitationCooldowns.set(declinedBy, Date.now() + 30000); // 30 second cooldown
+                        
+                        // Remove from sent invitations
+                        sentInvitations.delete(declinedBy);
+                    }
                 });
 
             } catch (error) {
@@ -690,6 +708,8 @@
             // Reset private chat state
             activeChatPartner = null;
             privateChatInvitations.clear();
+            sentInvitations.clear();
+            invitationCooldowns.clear();
             updatePrivateChatHeader();
             
             // Clear private chat messages
@@ -873,7 +893,16 @@
         }
         
         function declinePrivateChat(fromSid) {
-            // Just remove from pending invitations
+            if (!connected) return;
+            
+            // Make sure the invitation exists
+            const invitation = privateChatInvitations.get(fromSid);
+            if (!invitation) return;
+            
+            // Tell the server about the declined invitation
+            socket.emit('decline_private_chat', { from_sid: fromSid });
+            
+            // Remove from pending invitations
             privateChatInvitations.delete(fromSid);
         }
         
@@ -1045,8 +1074,41 @@
         function initiatePrivateChat(userId, username) {
             if (!connected) return;
             
+            // Check if we already have an active chat with this user
+            if (activeChatPartner && activeChatPartner.id === userId) {
+                // Already chatting with this user, just switch to the private chat tab
+                switchChatTab('private');
+                return;
+            }
+            
+            // Check if we've already sent an invitation to this user
+            if (sentInvitations.has(userId)) {
+                addPrivateSystemMessage(`You've already sent an invitation to ${username}. Please wait for their response.`);
+                switchChatTab('private');
+                return;
+            }
+            
+            // Check if there's a cooldown period active for this user
+            const cooldownUntil = invitationCooldowns.get(userId);
+            if (cooldownUntil && Date.now() < cooldownUntil) {
+                const secondsLeft = Math.ceil((cooldownUntil - Date.now()) / 1000);
+                addPrivateSystemMessage(`${username} recently declined your invitation. You can try again in ${secondsLeft} seconds.`);
+                switchChatTab('private');
+                return;
+            }
+            
+            // Store the sent invitation
+            sentInvitations.set(userId, {
+                timestamp: Date.now(),
+                username: username
+            });
+            
             // Send request to start private chat
             socket.emit('start_private_chat', { target_sid: userId });
+            
+            // Add a system message to indicate the invitation was sent
+            addPrivateSystemMessage(`Invitation sent to ${username}`);
+            switchChatTab('private');
         }
 
         function scrollToBottom() {
