@@ -12,10 +12,28 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# Get the production flag from environment (Render is production)
+is_production = 'RENDER' in os.environ
+
 # Initialize Flask app and Socket.IO
 app = Flask(__name__)
-sio = socketio.Server(cors_allowed_origins='*')
+# Configure Socket.IO with more permissive CORS
+socketio_kwargs = {
+    'cors_allowed_origins': '*',
+    'async_mode': 'eventlet',
+    'logger': True,
+    'engineio_logger': True  # Log engine.io messages too
+}
+sio = socketio.Server(**socketio_kwargs)
 app.wsgi_app = socketio.WSGIApp(sio, app.wsgi_app)
+
+# Add CORS headers to all responses
+@app.after_request
+def add_cors_headers(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'GET, POST, OPTIONS'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type'
+    return response
 
 # Global variables
 clients = {}
@@ -47,6 +65,8 @@ def connect(sid, environ):
     """Handle client connection"""
     client_ip = environ.get('REMOTE_ADDR', 'Unknown')
     logger.info(f"Client connected: {sid} from {client_ip}")
+    logger.info(f"Connection environ: {environ.get('HTTP_ORIGIN', 'No origin')} via {environ.get('HTTP_USER_AGENT', 'Unknown UA')}")
+    
     clients[sid] = {
         'username': f"Guest_{sid[:4]}",
         'connected_at': time.time(),
@@ -84,6 +104,11 @@ def connect(sid, environ):
     
     # Send updated user list to all clients
     emit_user_list()
+
+@sio.event
+def connect_error(data):
+    """Log connection errors"""
+    logger.error(f"Connection error: {data}")
 
 @sio.event
 def disconnect(sid):
@@ -188,6 +213,7 @@ def emit_user_list():
 def index():
     """Serve a simple status page"""
     server_url = request.url_root.rstrip('/')
+    ssl_enabled = request.is_secure or server_url.startswith('https://')
     
     html = f"""
     <!DOCTYPE html>
@@ -200,6 +226,8 @@ def index():
             .card {{ background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
             pre {{ background: #e0e0e0; padding: 10px; border-radius: 3px; overflow-x: auto; }}
             .success {{ color: #28a745; }}
+            .warning {{ color: #ffc107; }}
+            .code {{ font-family: monospace; background: #e0e0e0; padding: 2px 4px; }}
         </style>
     </head>
     <body>
@@ -208,6 +236,7 @@ def index():
         <div class="card">
             <h2>Server Status: <span class="success">Running</span></h2>
             <p>Server URL: <code>{server_url}</code></p>
+            <p>SSL/HTTPS: <span class="{'success' if ssl_enabled else 'warning'}">{ssl_enabled}</span></p>
             <p>Connected users: <strong>{len(clients)}</strong></p>
             <p>Messages in history: <strong>{len(chat_history)}</strong></p>
             <p>Server uptime: <strong>{int((time.time() - server_start_time) / 60)} minutes</strong></p>
@@ -218,10 +247,23 @@ def index():
             <p>To use this chat server:</p>
             <ol>
                 <li>Open the client URL: <a href="{server_url}/client" target="_blank">{server_url}/client</a></li>
-                <li>Enter this server URL: <code>{server_url}</code></li>
+                <li>The server URL should be auto-filled: <code>{server_url}</code></li>
                 <li>Click Connect</li>
+                <li>If you have trouble connecting, make sure you're using the same protocol (HTTP or HTTPS)</li>
             </ol>
             <p>You can share this server URL with anyone to let them connect to your chat!</p>
+        </div>
+        
+        <div class="card">
+            <h2>Troubleshooting</h2>
+            <p>If you have trouble connecting:</p>
+            <ul>
+                <li>Open your browser's console (F12) to check for connection errors</li>
+                <li>Make sure the client and server both use the same protocol (HTTP or HTTPS)</li>
+                <li>If using HTTPS, ensure the Socket.IO connection also uses secure WebSockets (wss://)</li>
+                <li>Try opening the client in a private/incognito window to avoid cached resources</li>
+            </ul>
+            <p>Server-side logs are available in your Render dashboard.</p>
         </div>
     </body>
     </html>
@@ -440,7 +482,7 @@ def client():
                         </div>
                     </div>
                 </div>
-                <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+                <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
                 <script>
                     // DOM Elements
                     const serverAddressInput = document.getElementById('server-address');
@@ -484,9 +526,29 @@ def client():
                         statusText.textContent = 'Connecting...';
 
                         try {
-                            socket = io(serverAddress);
+                            console.log('Connecting to:', serverAddress);
+                            // Create Socket.IO connection with explicit transports
+                            socket = io(serverAddress, {
+                                transports: ['websocket', 'polling'],
+                                reconnectionAttempts: 3,
+                                timeout: 10000
+                            });
+
+                            // Set up connection timeout
+                            const connectionTimeout = setTimeout(() => {
+                                if (!connected) {
+                                    console.error('Connection timed out');
+                                    if (socket) {
+                                        socket.close();
+                                    }
+                                    handleDisconnect();
+                                    alert('Connection timed out. Please check the server address and try again.');
+                                }
+                            }, 10000);
 
                             socket.on('connect', function() {
+                                clearTimeout(connectionTimeout);
+                                console.log('Connected successfully to:', serverAddress);
                                 connected = true;
                                 connectBtn.style.display = 'none';
                                 disconnectBtn.style.display = 'block';
