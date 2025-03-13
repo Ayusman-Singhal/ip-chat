@@ -38,6 +38,8 @@ def add_cors_headers(response):
 # Global variables
 clients = {}
 chat_history = []
+# Add private chat storage
+private_chats = {}  # Format: {(user1_sid, user2_sid): [messages]}
 MAX_HISTORY = 100  # Maximum number of messages to keep in history
 MAX_HISTORY_TO_SEND = 20  # Maximum number of messages to send to new clients
 
@@ -70,7 +72,8 @@ def connect(sid, environ):
     clients[sid] = {
         'username': f"Guest_{sid[:4]}",
         'connected_at': time.time(),
-        'ip': client_ip
+        'ip': client_ip,
+        'active_private_chat': None  # Add tracking for active private chat
     }
     
     # Calculate current timestamp
@@ -121,28 +124,56 @@ def connect_error(data):
 @sio.event
 def disconnect(sid):
     """Handle client disconnection"""
-    if sid in clients:
-        username = clients[sid]['username']
-        logger.info(f"Client disconnected: {username} ({sid})")
-        
-        # Get current timestamp
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        time_ms = int(time.time() * 1000)
-        
-        # Notify remaining users
-        leave_msg = {
-            'type': 'system',
-            'text': f"{username} has left the chat",
-            'timestamp': timestamp,
-            'id': f"leave_{sid}_{time_ms}"
-        }
-        sio.emit('message', leave_msg)
-        
-        # Remove from clients list
-        del clients[sid]
-        
-        # Send updated user list
-        emit_user_list()
+    if sid not in clients:
+        return
+    
+    username = clients[sid]['username']
+    logger.info(f"Client disconnected: {username} ({sid})")
+    
+    # Get current timestamp
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
+    # Notify remaining users
+    leave_msg = {
+        'type': 'system',
+        'text': f"{username} has left the chat",
+        'timestamp': timestamp,
+        'id': f"leave_{sid}_{time_ms}"
+    }
+    sio.emit('message', leave_msg)
+    
+    # Clean up private chats
+    private_chats_to_remove = []
+    for chat_key in private_chats:
+        if sid in chat_key:
+            # Find the other user in this private chat
+            other_sid = chat_key[0] if chat_key[1] == sid else chat_key[1]
+            if other_sid in clients:
+                # Notify the other user that the private chat has ended
+                end_chat_msg = {
+                    'type': 'system',
+                    'text': f"Private chat with {username} has ended as they disconnected",
+                    'timestamp': timestamp,
+                    'id': f"private_end_{sid}_{time_ms}",
+                    'private_chat_ended': True
+                }
+                sio.emit('private_message', end_chat_msg, room=other_sid)
+                # Update the other user's active private chat
+                clients[other_sid]['active_private_chat'] = None
+            
+            # Mark this chat for removal
+            private_chats_to_remove.append(chat_key)
+    
+    # Remove ended private chats
+    for chat_key in private_chats_to_remove:
+        del private_chats[chat_key]
+    
+    # Remove from clients list
+    del clients[sid]
+    
+    # Send updated user list
+    emit_user_list()
 
 @sio.event
 def chat_message(sid, data):
@@ -152,6 +183,7 @@ def chat_message(sid, data):
     
     username = clients[sid]['username']
     text = data.get('text', '').strip()
+    message_type = data.get('type', 'global')  # 'global' or 'private'
     
     if not text:
         return
@@ -173,23 +205,72 @@ def chat_message(sid, data):
     timestamp = datetime.now().strftime("%H:%M:%S")
     message_time = int(time.time() * 1000)  # Milliseconds since epoch
     
-    # Create message object
-    msg = {
-        'type': 'chat',
-        'username': username,
-        'text': text,
-        'timestamp': timestamp,
-        'id': f"msg_{message_time}_{sid}"  # Add unique ID
-    }
+    # Handle global chat message
+    if message_type == 'global':
+        # Create message object
+        msg = {
+            'type': 'chat',
+            'username': username,
+            'text': text,
+            'timestamp': timestamp,
+            'id': f"msg_{message_time}_{sid}"  # Add unique ID
+        }
+        
+        # Add to history and limit size
+        chat_history.append(msg)
+        if len(chat_history) > MAX_HISTORY:
+            chat_history.pop(0)
+        
+        # Broadcast to all clients
+        logger.info(f"Global message from {username}: {text}")
+        sio.emit('message', msg)
     
-    # Add to history and limit size
-    chat_history.append(msg)
-    if len(chat_history) > MAX_HISTORY:
-        chat_history.pop(0)
-    
-    # Broadcast to all clients
-    logger.info(f"Message from {username}: {text}")
-    sio.emit('message', msg)
+    # Handle private chat message
+    elif message_type == 'private':
+        target_sid = data.get('target_sid')
+        
+        # Check if target user exists
+        if target_sid not in clients:
+            error_msg = {
+                'type': 'system',
+                'text': "User is no longer connected",
+                'timestamp': timestamp,
+                'id': f"error_{sid}_{message_time}"
+            }
+            sio.emit('private_message', error_msg, room=sid)
+            return
+        
+        # Get target username
+        target_username = clients[target_sid]['username']
+        
+        # Create private message object
+        private_msg = {
+            'type': 'chat',
+            'username': username,
+            'text': text,
+            'timestamp': timestamp,
+            'id': f"private_{message_time}_{sid}",
+            'is_private': True,
+            'sender_sid': sid,
+            'target_sid': target_sid
+        }
+        
+        # Sort SIDs to ensure consistent key for the chat participants
+        chat_key = tuple(sorted([sid, target_sid]))
+        
+        # Create chat history entry if it doesn't exist
+        if chat_key not in private_chats:
+            private_chats[chat_key] = []
+        
+        # Add to private chat history and limit size
+        private_chats[chat_key].append(private_msg)
+        if len(private_chats[chat_key]) > MAX_HISTORY:
+            private_chats[chat_key].pop(0)
+        
+        # Send to both participants
+        logger.info(f"Private message from {username} to {target_username}: {text}")
+        sio.emit('private_message', private_msg, room=sid)
+        sio.emit('private_message', private_msg, room=target_sid)
 
 @sio.event
 def set_username(sid, data):
@@ -228,9 +309,187 @@ def set_username(sid, data):
     # Send updated user list
     emit_user_list()
 
+# Add new handlers for private chat functionality
+@sio.event
+def start_private_chat(sid, data):
+    """Start a private chat with another user"""
+    if sid not in clients:
+        return
+    
+    target_sid = data.get('target_sid')
+    
+    # Validate target
+    if not target_sid or target_sid not in clients or target_sid == sid:
+        error_msg = {
+            'type': 'system',
+            'text': "Invalid user selected for private chat",
+            'timestamp': datetime.now().strftime("%H:%M:%S"),
+            'id': f"error_{sid}_{int(time.time()*1000)}"
+        }
+        sio.emit('private_message', error_msg, room=sid)
+        return
+    
+    # Get usernames
+    username = clients[sid]['username']
+    target_username = clients[target_sid]['username']
+    
+    # Update active private chat for both users
+    clients[sid]['active_private_chat'] = target_sid
+    
+    # Send notification to initiator
+    start_msg = {
+        'type': 'system',
+        'text': f"Starting private chat with {target_username}",
+        'timestamp': datetime.now().strftime("%H:%M:%S"),
+        'id': f"private_start_{sid}_{int(time.time()*1000)}",
+        'target_sid': target_sid,
+        'target_username': target_username
+    }
+    sio.emit('private_chat_started', start_msg, room=sid)
+    
+    # Send invitation to target user
+    invite_msg = {
+        'type': 'system',
+        'text': f"{username} wants to chat privately with you",
+        'timestamp': datetime.now().strftime("%H:%M:%S"),
+        'id': f"private_invite_{sid}_{int(time.time()*1000)}",
+        'from_sid': sid,
+        'from_username': username
+    }
+    sio.emit('private_chat_invitation', invite_msg, room=target_sid)
+    
+    # Set up private chat history if not exists
+    chat_key = tuple(sorted([sid, target_sid]))
+    if chat_key not in private_chats:
+        private_chats[chat_key] = []
+    
+    # Send previous chat history if any
+    if private_chats[chat_key]:
+        recent_history = private_chats[chat_key][-MAX_HISTORY_TO_SEND:]
+        history_notice = {
+            'type': 'system',
+            'text': f"Showing last {len(recent_history)} messages with {target_username}",
+            'timestamp': datetime.now().strftime("%H:%M:%S"),
+            'id': f"private_history_{sid}_{int(time.time()*1000)}"
+        }
+        sio.emit('private_message', history_notice, room=sid)
+        
+        for msg in recent_history:
+            sio.emit('private_message', msg, room=sid)
+
+@sio.event
+def accept_private_chat(sid, data):
+    """Accept a private chat invitation"""
+    if sid not in clients:
+        return
+    
+    from_sid = data.get('from_sid')
+    
+    # Validate sender
+    if not from_sid or from_sid not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid]['username']
+    from_username = clients[from_sid]['username']
+    
+    # Update active private chat
+    clients[sid]['active_private_chat'] = from_sid
+    
+    # Send notification to both users
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
+    # Notify the acceptor
+    accept_msg = {
+        'type': 'system',
+        'text': f"You joined private chat with {from_username}",
+        'timestamp': timestamp,
+        'id': f"private_accept_{sid}_{time_ms}",
+        'target_sid': from_sid,
+        'target_username': from_username
+    }
+    sio.emit('private_chat_started', accept_msg, room=sid)
+    
+    # Notify the initiator
+    joined_msg = {
+        'type': 'system',
+        'text': f"{username} accepted your private chat invitation",
+        'timestamp': timestamp,
+        'id': f"private_joined_{from_sid}_{time_ms}"
+    }
+    sio.emit('private_chat_accepted', joined_msg, room=from_sid)
+    
+    # Set up chat history if not exists
+    chat_key = tuple(sorted([sid, from_sid]))
+    if chat_key not in private_chats:
+        private_chats[chat_key] = []
+    
+    # Send previous chat history if any
+    if private_chats[chat_key]:
+        recent_history = private_chats[chat_key][-MAX_HISTORY_TO_SEND:]
+        history_notice = {
+            'type': 'system',
+            'text': f"Showing last {len(recent_history)} messages with {from_username}",
+            'timestamp': timestamp,
+            'id': f"private_history_{sid}_{time_ms}"
+        }
+        sio.emit('private_message', history_notice, room=sid)
+        
+        for msg in recent_history:
+            sio.emit('private_message', msg, room=sid)
+
+@sio.event
+def end_private_chat(sid, data):
+    """End a private chat session"""
+    if sid not in clients:
+        return
+    
+    active_chat = clients[sid].get('active_private_chat')
+    if not active_chat or active_chat not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid]['username']
+    other_username = clients[active_chat]['username']
+    
+    # Generate timestamp
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
+    # Notify both users
+    end_msg = {
+        'type': 'system',
+        'text': f"Private chat with {other_username} has ended",
+        'timestamp': timestamp,
+        'id': f"private_end_{sid}_{time_ms}",
+        'private_chat_ended': True
+    }
+    sio.emit('private_message', end_msg, room=sid)
+    
+    other_end_msg = {
+        'type': 'system',
+        'text': f"Private chat with {username} has ended",
+        'timestamp': timestamp,
+        'id': f"private_end_{active_chat}_{time_ms}",
+        'private_chat_ended': True
+    }
+    sio.emit('private_message', other_end_msg, room=active_chat)
+    
+    # Reset active chat for both users
+    clients[sid]['active_private_chat'] = None
+    clients[active_chat]['active_private_chat'] = None
+    
+    # We keep the chat history in case they want to chat again
+    # It will be cleaned up when either user disconnects
+
 def emit_user_list():
     """Send updated user list to all clients"""
-    users = [{'id': sid, 'username': data['username']} for sid, data in clients.items()]
+    users = [{
+        'id': sid, 
+        'username': data['username'],
+        'in_private_chat': data['active_private_chat'] is not None
+    } for sid, data in clients.items()]
     sio.emit('user_list', {'users': users})
 
 @app.route('/')
