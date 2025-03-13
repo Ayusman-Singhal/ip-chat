@@ -483,6 +483,41 @@ def end_private_chat(sid, data):
     # We keep the chat history in case they want to chat again
     # It will be cleaned up when either user disconnects
 
+@sio.event
+def decline_private_chat(sid, data):
+    """Decline a private chat invitation"""
+    if sid not in clients:
+        return
+    
+    from_sid = data.get('from_sid')
+    
+    # Validate sender
+    if not from_sid or from_sid not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid]['username']
+    from_username = clients[from_sid]['username']
+    
+    # Generate timestamp
+    timestamp = datetime.now().strftime("%H:%M:%S")
+    time_ms = int(time.time() * 1000)
+    
+    # Notify the requester that their invitation was declined
+    declined_msg = {
+        'type': 'system',
+        'text': f"{username} declined your private chat invitation",
+        'timestamp': timestamp,
+        'id': f"private_declined_{sid}_{time_ms}",
+        'invitation_declined': True,
+        'declined_by': sid
+    }
+    sio.emit('private_chat_declined', declined_msg, room=from_sid)
+    
+    # Don't update active private chat status since the invitation was declined
+    
+    logger.info(f"Private chat invitation from {from_username} to {username} was declined")
+
 def emit_user_list():
     """Send updated user list to all clients"""
     users = [{
