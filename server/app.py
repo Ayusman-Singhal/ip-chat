@@ -23,6 +23,9 @@ chat_history = []
 MAX_HISTORY = 100  # Maximum number of messages to keep in history
 MAX_HISTORY_TO_SEND = 20  # Maximum number of messages to send to new clients
 
+# Store server start time (moved to global scope)
+server_start_time = time.time()
+
 def get_ip_address():
     """Get the primary IP address of the machine"""
     try:
@@ -245,9 +248,6 @@ def stats():
 port = int(os.environ.get('PORT', 5000))
 
 if __name__ == '__main__':
-    # Store server start time
-    server_start_time = time.time()
-    
     logger.info("=" * 50)
     logger.info("IP Chat Server")
     logger.info("=" * 50)
