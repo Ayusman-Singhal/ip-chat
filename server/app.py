@@ -528,7 +528,9 @@ def client():
                     let processedMessageIds = new Set(); // Track message IDs to prevent duplicates
 
                     // Auto-fill server address with current host
-                    serverAddressInput.value = window.location.origin;
+                    const serverHost = window.location.host;
+                    const serverProtocol = window.location.protocol;
+                    serverAddressInput.value = `${serverProtocol}//${serverHost}`;
 
                     // Event Listeners
                     connectBtn.addEventListener('click', connectToServer);
