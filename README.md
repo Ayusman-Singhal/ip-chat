@@ -40,7 +40,6 @@ You can share the URL with anyone to let them join your chat.
 To test this version locally:
 
 ```bash
-cd render
 pip install -r requirements.txt
 python start.py
 ```
