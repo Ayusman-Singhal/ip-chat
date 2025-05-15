@@ -1,0 +1,153 @@
+name: Create gh-pages Branch
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # We need full history for branch creation
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install flask eventlet
+          fi
+          pip install pdoc3
+
+      - name: Generate documentation
+        run: |
+          # Create docs directory
+          mkdir -p docs
+          
+          # Create index.html file
+          cat > docs/index.html << EOF
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>IP Chat Server Documentation</title>
+            <style>
+              body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+              pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+              code { font-family: monospace; }
+            </style>
+          </head>
+          <body>
+            <h1>IP Chat Server Documentation</h1>
+            <p>This documentation is automatically generated from the main branch.</p>
+            
+            <h2>Server Structure</h2>
+            <div id="server-structure">
+          EOF
+          
+          # Add server structure info
+          if [ -d "server" ]; then
+            echo "<p>Server directory contents:</p><ul>" >> docs/index.html
+            for file in $(find server -type f -name "*.py" | sort); do
+              echo "<li><code>$file</code></li>" >> docs/index.html
+            done
+            echo "</ul>" >> docs/index.html
+          else
+            echo "<p>Server directory not found.</p>" >> docs/index.html
+          fi
+          
+          # Add startup script info
+          cat >> docs/index.html << EOF
+            </div>
+            
+            <h2>Startup Script</h2>
+            <p>The server is started using start.py:</p>
+            <pre><code>
+          EOF
+          
+          cat start.py >> docs/index.html
+          
+          cat >> docs/index.html << EOF
+            </code></pre>
+            
+            <h2>API Documentation</h2>
+          EOF
+          
+          # Try to generate API docs if possible
+          if [ -d "server" ]; then
+            mkdir -p docs/api
+            if pdoc --html --output-dir docs/api server; then
+              echo "<p><a href='api/server/'>View detailed API documentation</a></p>" >> docs/index.html
+            else
+              echo "<p>Failed to generate API documentation.</p>" >> docs/index.html
+            fi
+          else
+            echo "<p>No server module found to document.</p>" >> docs/index.html
+          fi
+          
+          # Copy README if it exists
+          if [ -f README.md ]; then
+            cat >> docs/index.html << EOF
+            <h2>README</h2>
+            <pre>
+          EOF
+            cat README.md >> docs/index.html
+            echo "</pre>" >> docs/index.html
+          fi
+          
+          cat >> docs/index.html << EOF
+            <footer>
+              <p>Last updated: $(date)</p>
+            </footer>
+          </body>
+          </html>
+          EOF
+          
+          # List files
+          ls -la docs/
+          echo "Documentation generation complete."
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions Bot"
+          git config --global user.email "actions@github.com"
+
+      - name: Create and push gh-pages branch
+        run: |
+          # Create orphan branch if it doesn't exist
+          if ! git ls-remote --heads origin gh-pages; then
+            git checkout --orphan gh-pages
+            git rm -rf .
+            echo "# IP Chat Documentation" > README.md
+            git add README.md
+            git commit -m "Initial gh-pages commit"
+            git push origin gh-pages
+          fi
+          
+          # Switch to gh-pages branch
+          git checkout gh-pages || git checkout -b gh-pages
+          
+          # Remove everything except .git directory
+          find . -maxdepth 1 ! -name '.git' ! -name 'docs' -exec rm -rf {} \;
+          
+          # Copy docs content to root
+          cp -r docs/* .
+          rm -rf docs
+          
+          # Add and commit changes
+          git add .
+          git commit -m "Update documentation $(date)" || echo "No changes to commit"
+          
+          # Push to gh-pages branch
+          git push origin gh-pages
