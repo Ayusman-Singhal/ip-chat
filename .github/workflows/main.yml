@@ -5,8 +5,19 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,64 +31,85 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            # Install minimal dependencies if requirements.txt is missing
+            pip install flask eventlet
+          fi
           pip install pdoc3
 
       - name: Generate documentation
         run: |
-          mkdir -p docs
-          pdoc --html --output-dir docs server
-          # Create index file
-          cat > docs/index.html << EOF
-          <!DOCTYPE html>
-          <html>
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>IP Chat Server Documentation</title>
-              <style>
-                body {
-                  font-family: Arial, sans-serif;
-                  max-width: 800px;
-                  margin: 0 auto;
-                  padding: 20px;
-                  line-height: 1.6;
-                }
-                h1 { color: #333; }
-                a { color: #0366d6; }
-                .module-list { margin-top: 20px; }
-              </style>
-            </head>
-            <body>
-              <h1>IP Chat Server Documentation</h1>
-              <p>Welcome to the IP Chat Server documentation. This page provides links to the API documentation generated from the code.</p>
-              
-              <div class="module-list">
-                <h2>Available Modules:</h2>
-                <ul>
-                  <li><a href="server/">Main Server Package</a></li>
-                </ul>
-              </div>
-              
-              <div class="info">
-                <h2>Repository Information</h2>
-                <p>This documentation is auto-generated from the source code using pdoc3.</p>
-                <p>Last updated: \$(date)</p>
-              </div>
-            </body>
-          </html>
-          EOF
+          mkdir -p _site
           
-          # Move the html files to the root of docs directory
-          mv docs/server/* docs/
+          # Create simple documentation for the server
+          echo "# IP Chat Server Documentation" > _site/index.md
+          echo "" >> _site/index.md
+          echo "## Overview" >> _site/index.md
+          echo "This is the documentation for the IP Chat Server." >> _site/index.md
+          echo "" >> _site/index.md
+          
+          # Document the server structure
+          echo "## Server Structure" >> _site/index.md
+          if [ -d "server" ]; then
+            echo "Server directory found. Contents:" >> _site/index.md
+            for file in $(find server -type f -name "*.py" | sort); do
+              echo "- \`$file\`" >> _site/index.md
+            done
+          else
+            echo "Server directory not found." >> _site/index.md
+          fi
+          
+          # Add startup script info
+          echo "" >> _site/index.md
+          echo "## Startup Script" >> _site/index.md
+          echo "The server is started using start.py, which sets up logging and initializes the server." >> _site/index.md
+          echo "" >> _site/index.md
+          echo "```python" >> _site/index.md
+          cat start.py >> _site/index.md
+          echo "```" >> _site/index.md
+          
+          # Try to generate API docs if possible
+          if [ -d "server" ]; then
+            echo "Generating API documentation..."
+            mkdir -p _site/api
+            pdoc --html --output-dir _site/api server || echo "Failed to generate API docs with pdoc"
+            
+            if [ -d "_site/api/server" ]; then
+              echo "" >> _site/index.md
+              echo "## API Documentation" >> _site/index.md
+              echo "[View detailed API documentation](api/server/)" >> _site/index.md
+            fi
+          fi
           
           # Copy README if it exists
           if [ -f README.md ]; then
-            cp README.md docs/
+            cp README.md _site/readme.md
+            echo "" >> _site/index.md
+            echo "## README" >> _site/index.md
+            echo "[View project README](readme.md)" >> _site/index.md
           fi
+          
+          # List files to verify
+          ls -la _site/
+          echo "Documentation generation complete."
 
-      - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
         with:
-          folder: docs
-          branch: gh-pages
+          path: '_site'
+          
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
