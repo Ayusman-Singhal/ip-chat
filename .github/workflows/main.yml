@@ -41,6 +41,7 @@ jobs:
 
       - name: Generate documentation
         run: |
+          # Create site directory - make sure we use consistent naming
           mkdir -p _site
           
           # Create simple documentation for the server
