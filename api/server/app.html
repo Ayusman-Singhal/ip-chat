@@ -1,0 +1,1304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>server.app API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>server.app</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="server.app.accept_private_chat"><code class="name flex">
+<span>def <span class="ident">accept_private_chat</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def accept_private_chat(sid, data):
+    &#34;&#34;&#34;Accept a private chat invitation&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    from_sid = data.get(&#39;from_sid&#39;)
+    
+    # Validate sender
+    if not from_sid or from_sid not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid][&#39;username&#39;]
+    from_username = clients[from_sid][&#39;username&#39;]
+    
+    # Update active private chat
+    clients[sid][&#39;active_private_chat&#39;] = from_sid
+    
+    # Send notification to both users
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Notify the acceptor
+    accept_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;You joined private chat with {from_username}&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;private_accept_{sid}_{time_ms}&#34;,
+        &#39;target_sid&#39;: from_sid,
+        &#39;target_username&#39;: from_username
+    }
+    sio.emit(&#39;private_chat_started&#39;, accept_msg, room=sid)
+    
+    # Notify the initiator
+    joined_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{username} accepted your private chat invitation&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;private_joined_{from_sid}_{time_ms}&#34;
+    }
+    sio.emit(&#39;private_chat_accepted&#39;, joined_msg, room=from_sid)
+    
+    # Set up chat history if not exists
+    chat_key = tuple(sorted([sid, from_sid]))
+    if chat_key not in private_chats:
+        private_chats[chat_key] = []
+    
+    # Send previous chat history if any
+    if private_chats[chat_key]:
+        recent_history = private_chats[chat_key][-MAX_HISTORY_TO_SEND:]
+        history_notice = {
+            &#39;type&#39;: &#39;system&#39;,
+            &#39;text&#39;: f&#34;Showing last {len(recent_history)} messages with {from_username}&#34;,
+            &#39;timestamp&#39;: timestamp,
+            &#39;id&#39;: f&#34;private_history_{sid}_{time_ms}&#34;
+        }
+        sio.emit(&#39;private_message&#39;, history_notice, room=sid)
+        
+        for msg in recent_history:
+            sio.emit(&#39;private_message&#39;, msg, room=sid)</code></pre>
+</details>
+<div class="desc"><p>Accept a private chat invitation</p></div>
+</dd>
+<dt id="server.app.add_cors_headers"><code class="name flex">
+<span>def <span class="ident">add_cors_headers</span></span>(<span>response)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.after_request
+def add_cors_headers(response):
+    response.headers[&#39;Access-Control-Allow-Origin&#39;] = &#39;*&#39;
+    response.headers[&#39;Access-Control-Allow-Methods&#39;] = &#39;GET, POST, OPTIONS&#39;
+    response.headers[&#39;Access-Control-Allow-Headers&#39;] = &#39;Content-Type&#39;
+    return response</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="server.app.chat_message"><code class="name flex">
+<span>def <span class="ident">chat_message</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def chat_message(sid, data):
+    &#34;&#34;&#34;Handle incoming chat messages&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    username = clients[sid][&#39;username&#39;]
+    text = data.get(&#39;text&#39;, &#39;&#39;).strip()
+    message_type = data.get(&#39;type&#39;, &#39;global&#39;)  # &#39;global&#39; or &#39;private&#39;
+    
+    if not text:
+        return
+    
+    # Check for clear history command
+    if text.lower() == &#34;/clear&#34;:
+        # Clear only for this user
+        clear_msg = {
+            &#39;type&#39;: &#39;system&#39;,
+            &#39;text&#39;: &#34;Chat history cleared for you&#34;,
+            &#39;timestamp&#39;: datetime.now().strftime(&#34;%H:%M:%S&#34;),
+            &#39;clear&#39;: True,  # Special flag for client to clear history
+            &#39;id&#39;: f&#34;clear_{sid}_{int(time.time()*1000)}&#34;  # Add unique ID
+        }
+        sio.emit(&#39;message&#39;, clear_msg, room=sid)
+        return
+    
+    # Generate a timestamp for the message
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    message_time = int(time.time() * 1000)  # Milliseconds since epoch
+    
+    # Handle global chat message
+    if message_type == &#39;global&#39;:
+        # Create message object
+        msg = {
+            &#39;type&#39;: &#39;chat&#39;,
+            &#39;username&#39;: username,
+            &#39;text&#39;: text,
+            &#39;timestamp&#39;: timestamp,
+            &#39;id&#39;: f&#34;msg_{message_time}_{sid}&#34;  # Add unique ID
+        }
+        
+        # Add to history and limit size
+        chat_history.append(msg)
+        if len(chat_history) &gt; MAX_HISTORY:
+            chat_history.pop(0)
+        
+        # Broadcast to all clients
+        logger.info(f&#34;Global message from {username}: {text}&#34;)
+        sio.emit(&#39;message&#39;, msg)
+    
+    # Handle private chat message
+    elif message_type == &#39;private&#39;:
+        target_sid = data.get(&#39;target_sid&#39;)
+        
+        # Check if target user exists
+        if target_sid not in clients:
+            error_msg = {
+                &#39;type&#39;: &#39;system&#39;,
+                &#39;text&#39;: &#34;User is no longer connected&#34;,
+                &#39;timestamp&#39;: timestamp,
+                &#39;id&#39;: f&#34;error_{sid}_{message_time}&#34;
+            }
+            sio.emit(&#39;private_message&#39;, error_msg, room=sid)
+            return
+        
+        # Get target username
+        target_username = clients[target_sid][&#39;username&#39;]
+        
+        # Create private message object
+        private_msg = {
+            &#39;type&#39;: &#39;chat&#39;,
+            &#39;username&#39;: username,
+            &#39;text&#39;: text,
+            &#39;timestamp&#39;: timestamp,
+            &#39;id&#39;: f&#34;private_{message_time}_{sid}&#34;,
+            &#39;is_private&#39;: True,
+            &#39;sender_sid&#39;: sid,
+            &#39;target_sid&#39;: target_sid
+        }
+        
+        # Sort SIDs to ensure consistent key for the chat participants
+        chat_key = tuple(sorted([sid, target_sid]))
+        
+        # Create chat history entry if it doesn&#39;t exist
+        if chat_key not in private_chats:
+            private_chats[chat_key] = []
+        
+        # Add to private chat history and limit size
+        private_chats[chat_key].append(private_msg)
+        if len(private_chats[chat_key]) &gt; MAX_HISTORY:
+            private_chats[chat_key].pop(0)
+        
+        # Send to both participants
+        logger.info(f&#34;Private message from {username} to {target_username}: {text}&#34;)
+        sio.emit(&#39;private_message&#39;, private_msg, room=sid)
+        sio.emit(&#39;private_message&#39;, private_msg, room=target_sid)</code></pre>
+</details>
+<div class="desc"><p>Handle incoming chat messages</p></div>
+</dd>
+<dt id="server.app.client"><code class="name flex">
+<span>def <span class="ident">client</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#39;/client&#39;)
+def client():
+    &#34;&#34;&#34;Serve the client page&#34;&#34;&#34;
+    try:
+        # Log the current path to help debug
+        client_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), &#39;client&#39;, &#39;index.html&#39;)
+        logger.info(f&#34;Attempting to read client from: {client_path}&#34;)
+        
+        # Check if the file exists
+        if not os.path.exists(client_path):
+            logger.error(f&#34;Client file not found at: {client_path}&#34;)
+            
+            # Try an alternative path directly in the app directory
+            alt_path = os.path.join(os.path.dirname(__file__), &#39;client.html&#39;)
+            if os.path.exists(alt_path):
+                logger.info(f&#34;Found client at alternative path: {alt_path}&#34;)
+                with open(alt_path, &#39;r&#39;) as f:
+                    content = f.read()
+                return content
+            
+            # If still not found, embed a basic client directly
+            logger.info(&#34;Serving embedded client HTML&#34;)
+            return &#34;&#34;&#34;
+            &lt;!DOCTYPE html&gt;
+            &lt;html lang=&#34;en&#34;&gt;
+            &lt;head&gt;
+                &lt;meta charset=&#34;UTF-8&#34;&gt;
+                &lt;meta name=&#34;viewport&#34; content=&#34;width=device-width, initial-scale=1.0&#34;&gt;
+                &lt;title&gt;IP Chat&lt;/title&gt;
+                &lt;style&gt;
+                    :root {
+                        --primary-color: #4a6fa5;
+                        --secondary-color: #6c8ebd;
+                        --background-color: #f5f5f5;
+                        --chat-bg: #ffffff;
+                        --text-color: #333333;
+                        --system-msg-color: #6c757d;
+                        --my-msg-bg: #e3f2fd;
+                        --other-msg-bg: #f8f9fa;
+                        --border-color: #dee2e6;
+                    }
+                    * { box-sizing: border-box; margin: 0; padding: 0; }
+                    body {
+                        font-family: &#39;Segoe UI&#39;, Tahoma, Geneva, Verdana, sans-serif;
+                        background-color: var(--background-color);
+                        color: var(--text-color);
+                        line-height: 1.6;
+                        height: 100vh;
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    header {
+                        background-color: var(--primary-color);
+                        color: white;
+                        padding: 1rem;
+                        text-align: center;
+                        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                    }
+                    .main-container {
+                        display: flex;
+                        flex: 1;
+                        overflow: hidden;
+                    }
+                    .sidebar {
+                        width: 250px;
+                        background-color: white;
+                        border-right: 1px solid var(--border-color);
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .chat-container {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        overflow: hidden;
+                    }
+                    .connection-panel, .username-panel {
+                        padding: 1rem;
+                        background-color: white;
+                        border-bottom: 1px solid var(--border-color);
+                    }
+                    .form-group {
+                        margin-bottom: 1rem;
+                    }
+                    label {
+                        display: block;
+                        margin-bottom: 0.5rem;
+                        font-weight: 500;
+                    }
+                    input, button {
+                        width: 100%;
+                        padding: 0.75rem;
+                        border: 1px solid var(--border-color);
+                        border-radius: 4px;
+                        font-size: 1rem;
+                    }
+                    button {
+                        background-color: var(--primary-color);
+                        color: white;
+                        border: none;
+                        cursor: pointer;
+                    }
+                    .chat-messages {
+                        flex: 1;
+                        padding: 1rem;
+                        overflow-y: auto;
+                        background-color: var(--chat-bg);
+                    }
+                    .chat-input {
+                        display: flex;
+                        padding: 1rem;
+                        background-color: white;
+                        border-top: 1px solid var(--border-color);
+                    }
+                    .chat-input input {
+                        flex: 1;
+                        margin-right: 0.5rem;
+                    }
+                    .chat-input button {
+                        width: auto;
+                    }
+                    .message {
+                        margin-bottom: 1rem;
+                        padding: 0.75rem;
+                        border-radius: 4px;
+                    }
+                    .message-system {
+                        background-color: #f8f9fa;
+                        color: var(--system-msg-color);
+                        text-align: center;
+                        font-style: italic;
+                    }
+                    .message-mine {
+                        background-color: var(--my-msg-bg);
+                        margin-left: 2rem;
+                    }
+                    .message-other {
+                        background-color: var(--other-msg-bg);
+                        margin-right: 2rem;
+                    }
+                    .message-header {
+                        display: flex;
+                        justify-content: space-between;
+                        margin-bottom: 0.5rem;
+                        font-size: 0.875rem;
+                    }
+                    .message-username {
+                        font-weight: bold;
+                    }
+                    .message-timestamp {
+                        color: var(--system-msg-color);
+                    }
+                    .users {
+                        list-style: none;
+                    }
+                    .users li {
+                        padding: 0.5rem 1rem;
+                        border-bottom: 1px solid var(--border-color);
+                    }
+                    @media (max-width: 768px) {
+                        .main-container {
+                            flex-direction: column;
+                        }
+                        .sidebar {
+                            width: 100%;
+                            max-height: 50%;
+                        }
+                    }
+                &lt;/style&gt;
+            &lt;/head&gt;
+            &lt;body&gt;
+                &lt;header&gt;
+                    &lt;h1&gt;IP Chat&lt;/h1&gt;
+                &lt;/header&gt;
+                &lt;div class=&#34;main-container&#34;&gt;
+                    &lt;div class=&#34;sidebar&#34; id=&#34;sidebar&#34;&gt;
+                        &lt;div class=&#34;connection-panel&#34;&gt;
+                            &lt;div class=&#34;form-group&#34;&gt;
+                                &lt;label for=&#34;server-address&#34;&gt;Server Address:&lt;/label&gt;
+                                &lt;input type=&#34;text&#34; id=&#34;server-address&#34; placeholder=&#34;Enter IP address or hostname:port&#34;&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&#34;form-group&#34;&gt;
+                                &lt;button id=&#34;connect-btn&#34;&gt;Connect&lt;/button&gt;
+                                &lt;button id=&#34;disconnect-btn&#34; style=&#34;display: none;&#34;&gt;Disconnect&lt;/button&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&#34;form-group&#34;&gt;
+                                &lt;label for=&#34;username&#34;&gt;Username:&lt;/label&gt;
+                                &lt;input type=&#34;text&#34; id=&#34;username&#34; placeholder=&#34;Enter username&#34; disabled&gt;
+                                &lt;button id=&#34;change-username-btn&#34; disabled&gt;Change&lt;/button&gt;
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&#34;status-bar&#34;&gt;
+                            &lt;div id=&#34;status-indicator&#34;&gt;&lt;/div&gt;
+                            &lt;span id=&#34;status-text&#34;&gt;Disconnected&lt;/span&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&#34;user-list&#34;&gt;
+                            &lt;h3&gt;Online Users (0)&lt;/h3&gt;
+                            &lt;ul class=&#34;users&#34; id=&#34;users-list&#34;&gt;&lt;/ul&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                    &lt;div class=&#34;chat-container&#34;&gt;
+                        &lt;div class=&#34;chat-messages&#34; id=&#34;chat-messages&#34;&gt;
+                            &lt;div class=&#34;message message-system&#34;&gt;
+                                Welcome to IP Chat! Connect to a server to start chatting.
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                        &lt;div class=&#34;chat-input&#34;&gt;
+                            &lt;input type=&#34;text&#34; id=&#34;message-input&#34; placeholder=&#34;Type a message...&#34; disabled&gt;
+                            &lt;button id=&#34;send-btn&#34; disabled&gt;Send&lt;/button&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+                &lt;/div&gt;
+                &lt;script src=&#34;https://cdn.socket.io/4.7.2/socket.io.min.js&#34;&gt;&lt;/script&gt;
+                &lt;script&gt;
+                    // DOM Elements
+                    const serverAddressInput = document.getElementById(&#39;server-address&#39;);
+                    const connectBtn = document.getElementById(&#39;connect-btn&#39;);
+                    const disconnectBtn = document.getElementById(&#39;disconnect-btn&#39;);
+                    const usernameInput = document.getElementById(&#39;username&#39;);
+                    const changeUsernameBtn = document.getElementById(&#39;change-username-btn&#39;);
+                    const statusIndicator = document.getElementById(&#39;status-indicator&#39;);
+                    const statusText = document.getElementById(&#39;status-text&#39;);
+                    const usersList = document.getElementById(&#39;users-list&#39;);
+                    const chatMessages = document.getElementById(&#39;chat-messages&#39;);
+                    const messageInput = document.getElementById(&#39;message-input&#39;);
+                    const sendBtn = document.getElementById(&#39;send-btn&#39;);
+
+                    // Variables
+                    let socket;
+                    let connected = false;
+                    let currentUsername = &#39;&#39;;
+                    let processedMessageIds = new Set(); // Track message IDs to prevent duplicates
+
+                    serverAddressInput.value = `https://ip-chat.onrender.com`;
+
+                    // Event Listeners
+                    connectBtn.addEventListener(&#39;click&#39;, connectToServer);
+                    disconnectBtn.addEventListener(&#39;click&#39;, handleDisconnect);
+                    changeUsernameBtn.addEventListener(&#39;click&#39;, changeUsername);
+                    sendBtn.addEventListener(&#39;click&#39;, sendMessage);
+                    messageInput.addEventListener(&#39;keypress&#39;, function(e) {
+                        if (e.key === &#39;Enter&#39;) sendMessage();
+                    });
+
+                    // Function to connect to the server
+                    function connectToServer() {
+                        const serverAddress = serverAddressInput.value.trim();
+                        if (!serverAddress) {
+                            alert(&#39;Please enter a server address&#39;);
+                            return;
+                        }
+
+                        connectBtn.disabled = true;
+                        statusText.textContent = &#39;Connecting...&#39;;
+
+                        try {
+                            console.log(&#39;Connecting to:&#39;, serverAddress);
+                            // Create Socket.IO connection with explicit transports
+                            socket = io(serverAddress, {
+                                transports: [&#39;websocket&#39;, &#39;polling&#39;],
+                                reconnectionAttempts: 3,
+                                timeout: 10000
+                            });
+
+                            // Set up connection timeout
+                            const connectionTimeout = setTimeout(() =&gt; {
+                                if (!connected) {
+                                    console.error(&#39;Connection timed out&#39;);
+                                    if (socket) {
+                                        socket.close();
+                                    }
+                                    handleDisconnect();
+                                    alert(&#39;Connection timed out. Please check the server address and try again.&#39;);
+                                }
+                            }, 10000);
+
+                            socket.on(&#39;connect&#39;, function() {
+                                clearTimeout(connectionTimeout);
+                                console.log(&#39;Connected successfully to:&#39;, serverAddress);
+                                connected = true;
+                                connectBtn.style.display = &#39;none&#39;;
+                                disconnectBtn.style.display = &#39;block&#39;;
+                                usernameInput.disabled = false;
+                                changeUsernameBtn.disabled = false;
+                                messageInput.disabled = false;
+                                sendBtn.disabled = false;
+
+                                statusIndicator.className = &#39;status-indicator status-connected&#39;;
+                                statusText.textContent = &#39;Connected&#39;;
+
+                                // Add initial system message
+                                addSystemMessage(&#39;Connected to server&#39;, &#39;connect_&#39; + Date.now());
+                            });
+
+                            socket.on(&#39;disconnect&#39;, function() {
+                                handleDisconnect();
+                                addSystemMessage(&#39;Disconnected from server&#39;);
+                            });
+
+                            // Chat events
+                            socket.on(&#39;message&#39;, function(message) {
+                                if (message.type === &#39;system&#39;) {
+                                    if (message.clear) {
+                                        clearChatHistory();
+                                        addSystemMessage(message.text);
+                                    } else {
+                                        addSystemMessage(message.text);
+                                    }
+                                } else if (message.type === &#39;chat&#39;) {
+                                    addChatMessage(message);
+                                }
+                            });
+
+                            socket.on(&#39;user_list&#39;, function(data) {
+                                updateUserList(data.users);
+                            });
+
+                            socket.on(&#39;username_changed&#39;, function(data) {
+                                currentUsername = data.username;
+                                usernameInput.value = currentUsername;
+                            });
+
+                            socket.on(&#39;username_error&#39;, function(data) {
+                                alert(data.error);
+                            });
+
+                        } catch (error) {
+                            console.error(&#39;Error connecting to server:&#39;, error);
+                            handleDisconnect();
+                            alert(&#39;Failed to connect to server. Please check the address and try again.&#39;);
+                        }
+                    }
+
+                    function handleDisconnect() {
+                        connected = false;
+                        connectBtn.style.display = &#39;block&#39;;
+                        disconnectBtn.style.display = &#39;none&#39;;
+                        connectBtn.disabled = false;
+                        usernameInput.disabled = true;
+                        changeUsernameBtn.disabled = true;
+                        messageInput.disabled = true;
+                        sendBtn.disabled = true;
+
+                        statusIndicator.className = &#39;status-indicator status-disconnected&#39;;
+                        statusText.textContent = &#39;Disconnected&#39;;
+
+                        currentUsername = &#39;&#39;;
+                        usernameInput.value = &#39;&#39;;
+                        
+                        // Clear user list
+                        usersList.innerHTML = &#39;&#39;;
+                        
+                        if (socket) {
+                            socket.disconnect();
+                            socket = null;
+                        }
+                    }
+
+                    function sendMessage() {
+                        if (!connected) return;
+
+                        const text = messageInput.value.trim();
+                        if (!text) return;
+
+                        // Send the message to the server
+                        socket.emit(&#39;chat_message&#39;, { text });
+
+                        // Clear input field
+                        messageInput.value = &#39;&#39;;
+                    }
+
+                    function changeUsername() {
+                        if (!connected) return;
+
+                        const newUsername = usernameInput.value.trim();
+                        if (!newUsername) {
+                            alert(&#39;Username cannot be empty&#39;);
+                            return;
+                        }
+
+                        socket.emit(&#39;set_username&#39;, { username: newUsername });
+                    }
+
+                    function addSystemMessage(text, messageId) {
+                        // Create unique ID if not provided
+                        const id = messageId || &#39;sys_&#39; + Date.now() + &#39;_&#39; + Math.random().toString(36).substr(2, 9);
+                        
+                        // Check if we&#39;ve already processed this message
+                        if (processedMessageIds.has(id)) {
+                            console.log(&#39;Skipping duplicate system message:&#39;, id);
+                            return;
+                        }
+                        
+                        // Mark as processed
+                        processedMessageIds.add(id);
+                        
+                        const messageElem = document.createElement(&#39;div&#39;);
+                        messageElem.className = &#39;message message-system&#39;;
+                        messageElem.dataset.messageId = id;
+                        messageElem.textContent = text;
+                        chatMessages.appendChild(messageElem);
+                        scrollToBottom();
+                    }
+
+                    function addChatMessage(message) {
+                        // Generate or use message ID
+                        const id = message.id || `msg_${message.timestamp}_${message.username}_${message.text.substr(0, 10)}`;
+                        
+                        // Check if we&#39;ve already processed this message
+                        if (processedMessageIds.has(id)) {
+                            console.log(&#39;Skipping duplicate chat message:&#39;, id);
+                            return;
+                        }
+                        
+                        // Mark as processed
+                        processedMessageIds.add(id);
+                        
+                        const isMine = message.username === currentUsername;
+                        
+                        const messageElem = document.createElement(&#39;div&#39;);
+                        messageElem.className = isMine ? &#39;message message-mine&#39; : &#39;message message-other&#39;;
+                        messageElem.dataset.messageId = id;
+                        
+                        const headerElem = document.createElement(&#39;div&#39;);
+                        headerElem.className = &#39;message-header&#39;;
+                        
+                        const usernameElem = document.createElement(&#39;span&#39;);
+                        usernameElem.className = &#39;message-username&#39;;
+                        usernameElem.textContent = message.username;
+                        
+                        const timestampElem = document.createElement(&#39;span&#39;);
+                        timestampElem.className = &#39;message-timestamp&#39;;
+                        timestampElem.textContent = message.timestamp;
+                        
+                        headerElem.appendChild(usernameElem);
+                        headerElem.appendChild(timestampElem);
+                        
+                        const textElem = document.createElement(&#39;div&#39;);
+                        textElem.className = &#39;message-text&#39;;
+                        textElem.textContent = message.text;
+                        
+                        messageElem.appendChild(headerElem);
+                        messageElem.appendChild(textElem);
+                        
+                        chatMessages.appendChild(messageElem);
+                        scrollToBottom();
+                    }
+
+                    function updateUserList(users) {
+                        usersList.innerHTML = &#39;&#39;;
+                        
+                        const usersHeading = document.querySelector(&#39;.user-list h3&#39;);
+                        usersHeading.textContent = `Online Users (${users.length})`;
+                        
+                        users.forEach(user =&gt; {
+                            const li = document.createElement(&#39;li&#39;);
+                            li.textContent = user.username;
+                            if (user.username === currentUsername) {
+                                li.style.fontWeight = &#39;bold&#39;;
+                            }
+                            usersList.appendChild(li);
+                        });
+                    }
+
+                    function scrollToBottom() {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }
+
+                    function clearChatHistory() {
+                        // Don&#39;t clear processedMessageIds - that&#39;s our duplicate prevention mechanism
+                        
+                        // Keep only the welcome message
+                        const welcomeMessage = chatMessages.querySelector(&#39;.message-system&#39;);
+                        chatMessages.innerHTML = &#39;&#39;;
+                        if (welcomeMessage) {
+                            chatMessages.appendChild(welcomeMessage);
+                        }
+                    }
+
+                    // Add function to handle server disconnect and reconnect
+                    function handleServerReconnect() {
+                        // Don&#39;t clear message IDs so we can prevent duplicates on reconnect
+                        // But we should clear the visible messages to avoid confusion
+                        clearChatHistory();
+                        addSystemMessage(&#39;Reconnected to server. History will be restored.&#39;);
+                    }
+                &lt;/script&gt;
+            &lt;/body&gt;
+            &lt;/html&gt;
+            &#34;&#34;&#34;
+        
+        # Normal path handling if file exists
+        with open(client_path, &#39;r&#39;) as f:
+            content = f.read()
+        return content
+    except Exception as e:
+        logger.error(f&#34;Error serving client: {e}&#34;)
+        # Return an error message instead of failing
+        return f&#34;&#34;&#34;
+        &lt;html&gt;
+        &lt;head&gt;&lt;title&gt;Client Error&lt;/title&gt;&lt;/head&gt;
+        &lt;body&gt;
+            &lt;h1&gt;Error loading chat client&lt;/h1&gt;
+            &lt;p&gt;There was an error loading the chat client: {str(e)}&lt;/p&gt;
+            &lt;p&gt;Please contact the administrator.&lt;/p&gt;
+        &lt;/body&gt;
+        &lt;/html&gt;
+        &#34;&#34;&#34;</code></pre>
+</details>
+<div class="desc"><p>Serve the client page</p></div>
+</dd>
+<dt id="server.app.connect"><code class="name flex">
+<span>def <span class="ident">connect</span></span>(<span>sid, environ)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def connect(sid, environ):
+    &#34;&#34;&#34;Handle client connection&#34;&#34;&#34;
+    client_ip = environ.get(&#39;REMOTE_ADDR&#39;, &#39;Unknown&#39;)
+    logger.info(f&#34;Client connected: {sid} from {client_ip}&#34;)
+    logger.info(f&#34;Connection environ: {environ.get(&#39;HTTP_ORIGIN&#39;, &#39;No origin&#39;)} via {environ.get(&#39;HTTP_USER_AGENT&#39;, &#39;Unknown UA&#39;)}&#34;)
+    
+    clients[sid] = {
+        &#39;username&#39;: f&#34;Guest_{sid[:4]}&#34;,
+        &#39;connected_at&#39;: time.time(),
+        &#39;ip&#39;: client_ip,
+        &#39;active_private_chat&#39;: None  # Add tracking for active private chat
+    }
+    
+    # Calculate current timestamp
+    now = datetime.now()
+    timestamp = now.strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Send welcome message and notify others
+    welcome_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;Welcome to the chat, {clients[sid][&#39;username&#39;]}! Type /clear to clear your chat history.&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;welcome_{sid}_{time_ms}&#34;
+    }
+    sio.emit(&#39;message&#39;, welcome_msg, room=sid)
+    
+    # Send limited history to new client (only recent messages)
+    recent_history = chat_history[-MAX_HISTORY_TO_SEND:] if chat_history else []
+    if recent_history:
+        history_notice = {
+            &#39;type&#39;: &#39;system&#39;,
+            &#39;text&#39;: f&#34;Showing last {len(recent_history)} messages&#34;,
+            &#39;timestamp&#39;: timestamp,
+            &#39;id&#39;: f&#34;history_notice_{sid}_{time_ms}&#34;
+        }
+        sio.emit(&#39;message&#39;, history_notice, room=sid)
+        
+        for msg in recent_history:
+            sio.emit(&#39;message&#39;, msg, room=sid)
+    
+    # Notify all users about new connection
+    join_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{clients[sid][&#39;username&#39;]} has joined the chat&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;join_{sid}_{time_ms}&#34;
+    }
+    sio.emit(&#39;message&#39;, join_msg, skip_sid=sid)
+    
+    # Send updated user list to all clients
+    emit_user_list()</code></pre>
+</details>
+<div class="desc"><p>Handle client connection</p></div>
+</dd>
+<dt id="server.app.connect_error"><code class="name flex">
+<span>def <span class="ident">connect_error</span></span>(<span>data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def connect_error(data):
+    &#34;&#34;&#34;Log connection errors&#34;&#34;&#34;
+    logger.error(f&#34;Connection error: {data}&#34;)</code></pre>
+</details>
+<div class="desc"><p>Log connection errors</p></div>
+</dd>
+<dt id="server.app.decline_private_chat"><code class="name flex">
+<span>def <span class="ident">decline_private_chat</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def decline_private_chat(sid, data):
+    &#34;&#34;&#34;Decline a private chat invitation&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    from_sid = data.get(&#39;from_sid&#39;)
+    
+    # Validate sender
+    if not from_sid or from_sid not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid][&#39;username&#39;]
+    from_username = clients[from_sid][&#39;username&#39;]
+    
+    # Generate timestamp
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Notify the requester that their invitation was declined
+    declined_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{username} declined your private chat invitation&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;private_declined_{sid}_{time_ms}&#34;,
+        &#39;invitation_declined&#39;: True,
+        &#39;declined_by&#39;: sid
+    }
+    sio.emit(&#39;private_chat_declined&#39;, declined_msg, room=from_sid)
+    
+    # Don&#39;t update active private chat status since the invitation was declined
+    
+    logger.info(f&#34;Private chat invitation from {from_username} to {username} was declined&#34;)</code></pre>
+</details>
+<div class="desc"><p>Decline a private chat invitation</p></div>
+</dd>
+<dt id="server.app.disconnect"><code class="name flex">
+<span>def <span class="ident">disconnect</span></span>(<span>sid)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def disconnect(sid):
+    &#34;&#34;&#34;Handle client disconnection&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    username = clients[sid][&#39;username&#39;]
+    logger.info(f&#34;Client disconnected: {username} ({sid})&#34;)
+    
+    # Get current timestamp
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Notify remaining users
+    leave_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{username} has left the chat&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;leave_{sid}_{time_ms}&#34;
+    }
+    sio.emit(&#39;message&#39;, leave_msg)
+    
+    # Clean up private chats
+    private_chats_to_remove = []
+    for chat_key in private_chats:
+        if sid in chat_key:
+            # Find the other user in this private chat
+            other_sid = chat_key[0] if chat_key[1] == sid else chat_key[1]
+            if other_sid in clients:
+                # Notify the other user that the private chat has ended
+                end_chat_msg = {
+                    &#39;type&#39;: &#39;system&#39;,
+                    &#39;text&#39;: f&#34;Private chat with {username} has ended as they disconnected&#34;,
+                    &#39;timestamp&#39;: timestamp,
+                    &#39;id&#39;: f&#34;private_end_{sid}_{time_ms}&#34;,
+                    &#39;private_chat_ended&#39;: True
+                }
+                sio.emit(&#39;private_message&#39;, end_chat_msg, room=other_sid)
+                # Update the other user&#39;s active private chat
+                clients[other_sid][&#39;active_private_chat&#39;] = None
+            
+            # Mark this chat for removal
+            private_chats_to_remove.append(chat_key)
+    
+    # Remove ended private chats
+    for chat_key in private_chats_to_remove:
+        del private_chats[chat_key]
+    
+    # Remove from clients list
+    del clients[sid]
+    
+    # Send updated user list
+    emit_user_list()</code></pre>
+</details>
+<div class="desc"><p>Handle client disconnection</p></div>
+</dd>
+<dt id="server.app.emit_user_list"><code class="name flex">
+<span>def <span class="ident">emit_user_list</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def emit_user_list():
+    &#34;&#34;&#34;Send updated user list to all clients&#34;&#34;&#34;
+    users = [{
+        &#39;id&#39;: sid, 
+        &#39;username&#39;: data[&#39;username&#39;],
+        &#39;in_private_chat&#39;: data[&#39;active_private_chat&#39;] is not None
+    } for sid, data in clients.items()]
+    sio.emit(&#39;user_list&#39;, {&#39;users&#39;: users})</code></pre>
+</details>
+<div class="desc"><p>Send updated user list to all clients</p></div>
+</dd>
+<dt id="server.app.end_private_chat"><code class="name flex">
+<span>def <span class="ident">end_private_chat</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def end_private_chat(sid, data):
+    &#34;&#34;&#34;End a private chat session&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    active_chat = clients[sid].get(&#39;active_private_chat&#39;)
+    if not active_chat or active_chat not in clients:
+        return
+    
+    # Get usernames
+    username = clients[sid][&#39;username&#39;]
+    other_username = clients[active_chat][&#39;username&#39;]
+    
+    # Generate timestamp
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Notify both users
+    end_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;Private chat with {other_username} has ended&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;private_end_{sid}_{time_ms}&#34;,
+        &#39;private_chat_ended&#39;: True
+    }
+    sio.emit(&#39;private_message&#39;, end_msg, room=sid)
+    
+    other_end_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;Private chat with {username} has ended&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;private_end_{active_chat}_{time_ms}&#34;,
+        &#39;private_chat_ended&#39;: True
+    }
+    sio.emit(&#39;private_message&#39;, other_end_msg, room=active_chat)
+    
+    # Reset active chat for both users
+    clients[sid][&#39;active_private_chat&#39;] = None
+    clients[active_chat][&#39;active_private_chat&#39;] = None
+    
+    # We keep the chat history in case they want to chat again
+    # It will be cleaned up when either user disconnects</code></pre>
+</details>
+<div class="desc"><p>End a private chat session</p></div>
+</dd>
+<dt id="server.app.get_ip_address"><code class="name flex">
+<span>def <span class="ident">get_ip_address</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_ip_address():
+    &#34;&#34;&#34;Get the primary IP address of the machine&#34;&#34;&#34;
+    try:
+        # When deployed on Render, use environment variable
+        if &#39;RENDER&#39; in os.environ:
+            return os.environ.get(&#39;RENDER_EXTERNAL_HOSTNAME&#39;, &#39;render-host&#39;)
+        
+        # For local development
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect((&#34;8.8.8.8&#34;, 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return &#34;127.0.0.1&#34;</code></pre>
+</details>
+<div class="desc"><p>Get the primary IP address of the machine</p></div>
+</dd>
+<dt id="server.app.index"><code class="name flex">
+<span>def <span class="ident">index</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#39;/&#39;)
+def index():
+    &#34;&#34;&#34;Serve a simple status page&#34;&#34;&#34;
+    server_url = request.url_root.rstrip(&#39;/&#39;)
+    ssl_enabled = request.is_secure or server_url.startswith(&#39;https://&#39;)
+    
+    html = f&#34;&#34;&#34;
+    &lt;!DOCTYPE html&gt;
+    &lt;html&gt;
+    &lt;head&gt;
+        &lt;title&gt;IP Chat Server&lt;/title&gt;
+        &lt;style&gt;
+            body {{ font-family: Arial, sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; }}
+            h1 {{ color: #4a6fa5; }}
+            .card {{ background: #f5f5f5; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
+            pre {{ background: #e0e0e0; padding: 10px; border-radius: 3px; overflow-x: auto; }}
+            .success {{ color: #28a745; }}
+            .warning {{ color: #ffc107; }}
+            .code {{ font-family: monospace; background: #e0e0e0; padding: 2px 4px; }}
+        &lt;/style&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;IP Chat Server&lt;/h1&gt;
+        
+        &lt;div class=&#34;card&#34;&gt;
+            &lt;h2&gt;Server Status: &lt;span class=&#34;success&#34;&gt;Running&lt;/span&gt;&lt;/h2&gt;
+            &lt;p&gt;Server URL: &lt;code&gt;{server_url}&lt;/code&gt;&lt;/p&gt;
+            &lt;p&gt;SSL/HTTPS: &lt;span class=&#34;{&#39;success&#39; if ssl_enabled else &#39;warning&#39;}&#34;&gt;{ssl_enabled}&lt;/span&gt;&lt;/p&gt;
+            &lt;p&gt;Connected users: &lt;strong&gt;{len(clients)}&lt;/strong&gt;&lt;/p&gt;
+            &lt;p&gt;Messages in history: &lt;strong&gt;{len(chat_history)}&lt;/strong&gt;&lt;/p&gt;
+            &lt;p&gt;Server uptime: &lt;strong&gt;{int((time.time() - server_start_time) / 60)} minutes&lt;/strong&gt;&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class=&#34;card&#34;&gt;
+            &lt;h2&gt;How to Connect&lt;/h2&gt;
+            &lt;p&gt;To use this chat server:&lt;/p&gt;
+            &lt;ol&gt;
+                &lt;li&gt;Open the client URL: &lt;a href=&#34;{server_url}/client&#34; target=&#34;_blank&#34;&gt;{server_url}/client&lt;/a&gt;&lt;/li&gt;
+                &lt;li&gt;The server URL should be auto-filled: &lt;code&gt;{server_url}&lt;/code&gt;&lt;/li&gt;
+                &lt;li&gt;Click Connect&lt;/li&gt;
+                &lt;li&gt;If you have trouble connecting, make sure you&#39;re using the same protocol (HTTP or HTTPS)&lt;/li&gt;
+            &lt;/ol&gt;
+            &lt;p&gt;You can share this server URL with anyone to let them connect to your chat!&lt;/p&gt;
+        &lt;/div&gt;
+        
+        &lt;div class=&#34;card&#34;&gt;
+            &lt;h2&gt;Troubleshooting&lt;/h2&gt;
+            &lt;p&gt;If you have trouble connecting:&lt;/p&gt;
+            &lt;ul&gt;
+                &lt;li&gt;Open your browser&#39;s console (F12) to check for connection errors&lt;/li&gt;
+                &lt;li&gt;Make sure the client and server both use the same protocol (HTTP or HTTPS)&lt;/li&gt;
+                &lt;li&gt;If using HTTPS, ensure the Socket.IO connection also uses secure WebSockets (wss://)&lt;/li&gt;
+                &lt;li&gt;Try opening the client in a private/incognito window to avoid cached resources&lt;/li&gt;
+            &lt;/ul&gt;
+            &lt;p&gt;Server-side logs are available in your Render dashboard.&lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/body&gt;
+    &lt;/html&gt;
+    &#34;&#34;&#34;
+    return html</code></pre>
+</details>
+<div class="desc"><p>Serve a simple status page</p></div>
+</dd>
+<dt id="server.app.set_username"><code class="name flex">
+<span>def <span class="ident">set_username</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def set_username(sid, data):
+    &#34;&#34;&#34;Handle username change request&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    old_username = clients[sid][&#39;username&#39;]
+    new_username = data.get(&#39;username&#39;, &#39;&#39;).strip()
+    
+    # Validate new username
+    if not new_username or len(new_username) &gt; 20 or new_username in [client[&#39;username&#39;] for _, client in clients.items() if _ != sid]:
+        # Send error if username is invalid or already taken
+        sio.emit(&#39;username_error&#39;, {&#39;error&#39;: &#39;Invalid username or already taken&#39;}, room=sid)
+        return
+    
+    # Update username
+    clients[sid][&#39;username&#39;] = new_username
+    
+    # Get current timestamp
+    timestamp = datetime.now().strftime(&#34;%H:%M:%S&#34;)
+    time_ms = int(time.time() * 1000)
+    
+    # Notify all users about the change
+    change_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{old_username} changed their name to {new_username}&#34;,
+        &#39;timestamp&#39;: timestamp,
+        &#39;id&#39;: f&#34;rename_{sid}_{time_ms}&#34;
+    }
+    sio.emit(&#39;message&#39;, change_msg)
+    
+    # Send success response to the client
+    sio.emit(&#39;username_changed&#39;, {&#39;username&#39;: new_username}, room=sid)
+    
+    # Send updated user list
+    emit_user_list()</code></pre>
+</details>
+<div class="desc"><p>Handle username change request</p></div>
+</dd>
+<dt id="server.app.start_private_chat"><code class="name flex">
+<span>def <span class="ident">start_private_chat</span></span>(<span>sid, data)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@sio.event
+def start_private_chat(sid, data):
+    &#34;&#34;&#34;Start a private chat with another user&#34;&#34;&#34;
+    if sid not in clients:
+        return
+    
+    target_sid = data.get(&#39;target_sid&#39;)
+    
+    # Validate target
+    if not target_sid or target_sid not in clients or target_sid == sid:
+        error_msg = {
+            &#39;type&#39;: &#39;system&#39;,
+            &#39;text&#39;: &#34;Invalid user selected for private chat&#34;,
+            &#39;timestamp&#39;: datetime.now().strftime(&#34;%H:%M:%S&#34;),
+            &#39;id&#39;: f&#34;error_{sid}_{int(time.time()*1000)}&#34;
+        }
+        sio.emit(&#39;private_message&#39;, error_msg, room=sid)
+        return
+    
+    # Get usernames
+    username = clients[sid][&#39;username&#39;]
+    target_username = clients[target_sid][&#39;username&#39;]
+    
+    # Update active private chat for both users
+    clients[sid][&#39;active_private_chat&#39;] = target_sid
+    
+    # Send notification to initiator
+    start_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;Starting private chat with {target_username}&#34;,
+        &#39;timestamp&#39;: datetime.now().strftime(&#34;%H:%M:%S&#34;),
+        &#39;id&#39;: f&#34;private_start_{sid}_{int(time.time()*1000)}&#34;,
+        &#39;target_sid&#39;: target_sid,
+        &#39;target_username&#39;: target_username
+    }
+    sio.emit(&#39;private_chat_started&#39;, start_msg, room=sid)
+    
+    # Send invitation to target user
+    invite_msg = {
+        &#39;type&#39;: &#39;system&#39;,
+        &#39;text&#39;: f&#34;{username} wants to chat privately with you&#34;,
+        &#39;timestamp&#39;: datetime.now().strftime(&#34;%H:%M:%S&#34;),
+        &#39;id&#39;: f&#34;private_invite_{sid}_{int(time.time()*1000)}&#34;,
+        &#39;from_sid&#39;: sid,
+        &#39;from_username&#39;: username
+    }
+    sio.emit(&#39;private_chat_invitation&#39;, invite_msg, room=target_sid)
+    
+    # Set up private chat history if not exists
+    chat_key = tuple(sorted([sid, target_sid]))
+    if chat_key not in private_chats:
+        private_chats[chat_key] = []
+    
+    # Send previous chat history if any
+    if private_chats[chat_key]:
+        recent_history = private_chats[chat_key][-MAX_HISTORY_TO_SEND:]
+        history_notice = {
+            &#39;type&#39;: &#39;system&#39;,
+            &#39;text&#39;: f&#34;Showing last {len(recent_history)} messages with {target_username}&#34;,
+            &#39;timestamp&#39;: datetime.now().strftime(&#34;%H:%M:%S&#34;),
+            &#39;id&#39;: f&#34;private_history_{sid}_{int(time.time()*1000)}&#34;
+        }
+        sio.emit(&#39;private_message&#39;, history_notice, room=sid)
+        
+        for msg in recent_history:
+            sio.emit(&#39;private_message&#39;, msg, room=sid)</code></pre>
+</details>
+<div class="desc"><p>Start a private chat with another user</p></div>
+</dd>
+<dt id="server.app.stats"><code class="name flex">
+<span>def <span class="ident">stats</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@app.route(&#39;/stats&#39;)
+def stats():
+    &#34;&#34;&#34;Return server statistics&#34;&#34;&#34;
+    return jsonify({
+        &#39;active_users&#39;: len(clients),
+        &#39;message_count&#39;: len(chat_history),
+        &#39;uptime&#39;: time.time() - server_start_time
+    })</code></pre>
+</details>
+<div class="desc"><p>Return server statistics</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="server" href="index.html">server</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="server.app.accept_private_chat" href="#server.app.accept_private_chat">accept_private_chat</a></code></li>
+<li><code><a title="server.app.add_cors_headers" href="#server.app.add_cors_headers">add_cors_headers</a></code></li>
+<li><code><a title="server.app.chat_message" href="#server.app.chat_message">chat_message</a></code></li>
+<li><code><a title="server.app.client" href="#server.app.client">client</a></code></li>
+<li><code><a title="server.app.connect" href="#server.app.connect">connect</a></code></li>
+<li><code><a title="server.app.connect_error" href="#server.app.connect_error">connect_error</a></code></li>
+<li><code><a title="server.app.decline_private_chat" href="#server.app.decline_private_chat">decline_private_chat</a></code></li>
+<li><code><a title="server.app.disconnect" href="#server.app.disconnect">disconnect</a></code></li>
+<li><code><a title="server.app.emit_user_list" href="#server.app.emit_user_list">emit_user_list</a></code></li>
+<li><code><a title="server.app.end_private_chat" href="#server.app.end_private_chat">end_private_chat</a></code></li>
+<li><code><a title="server.app.get_ip_address" href="#server.app.get_ip_address">get_ip_address</a></code></li>
+<li><code><a title="server.app.index" href="#server.app.index">index</a></code></li>
+<li><code><a title="server.app.set_username" href="#server.app.set_username">set_username</a></code></li>
+<li><code><a title="server.app.start_private_chat" href="#server.app.start_private_chat">start_private_chat</a></code></li>
+<li><code><a title="server.app.stats" href="#server.app.stats">stats</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

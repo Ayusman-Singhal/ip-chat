@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IP Chat Server Documentation</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; line-height: 1.6; }
+    pre { background-color: #f5f5f5; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    code { font-family: monospace; }
+  </style>
+</head>
+<body>
+  <h1>IP Chat Server Documentation</h1>
+  <p>This documentation is automatically generated from the main branch.</p>
+  
+  <h2>Server Structure</h2>
+  <div id="server-structure">
+<p>Server directory contents:</p><ul>
+<li><code>server/app.py</code></li>
+</ul>
+  </div>
+  
+  <h2>Startup Script</h2>
+  <p>The server is started using start.py:</p>
+  <pre><code>
+import os
+import sys
+import logging
+import time
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+def main():
+    """Start the IP Chat server"""
+    logger.info("Starting IP Chat Server for Render...")
+    
+    # Add the current directory to sys.path so we can import the server module
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    
+    # Import and run the server
+    try:
+        logger.info("Importing server modules...")
+        import eventlet
+        from server.app import app, port
+        
+        # Log environment information
+        logger.info(f"Python version: {sys.version}")
+        logger.info(f"Current directory: {os.getcwd()}")
+        logger.info(f"Available files: {os.listdir('.')}")
+        logger.info(f"Server port: {port}")
+        
+        if 'RENDER' in os.environ:
+            logger.info(f"Running on Render.com")
+            logger.info(f"RENDER_EXTERNAL_HOSTNAME: {os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'not set')}")
+        
+        logger.info(f"Server starting on port {port}")
+        eventlet.wsgi.server(eventlet.listen(('0.0.0.0', port)), app)
+    except ImportError as e:
+        logger.error(f"Import error: {e}")
+        logger.error(f"This usually means a required module is missing or the path structure is incorrect.")
+        
+        # Log more details to help debug
+        logger.info(f"sys.path: {sys.path}")
+        if os.path.exists('server'):
+            logger.info(f"Contents of server directory: {os.listdir('server')}")
+        
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Error starting server: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main() 
+  </code></pre>
+  
+  <h2>API Documentation</h2>
+<p><a href='api/server/'>View detailed API documentation</a></p>
+  <h2>README</h2>
+  <pre>
+# IP Chat - Render Deployment
+
+This folder contains a simplified version of IP Chat optimized for deployment on Render.com.
+
+## Features
+
+- No dependencies on UPnP or ngrok (not needed on cloud hosting)
+- Automatic environment detection for Render
+- Integrated client and server (client is served directly by the server)
+- Simple deployment process
+
+## Deploying to Render
+
+1. Create a new Web Service on Render
+2. Connect to your GitHub repository
+3. Configure as follows:
+   - **Name**: Choose a name (e.g., "ip-chat")
+   - **Root Directory**: `render` (this directory)
+   - **Runtime**: Python 3
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `python start.py`
+   - **Instance Type**: Free (or paid if you need better performance)
+
+That's it! Render will automatically deploy your application and provide a public URL.
+
+## Using the Deployed Chat
+
+Once deployed:
+
+1. Visit your Render URL (e.g., `https://ip-chat.onrender.com`)
+2. You'll see the status page with connection information
+3. Click on the client link to open the web client
+4. The server URL should be automatically filled in
+5. Click Connect and start chatting!
+
+You can share the URL with anyone to let them join your chat.
+
+## Local Testing
+
+To test this version locally:
+
+```bash
+pip install -r requirements.txt
+python start.py
+```
+
+Then open http://localhost:5000 in your browser. 
+</pre>
+  <footer>
+    <p>Last updated: Thu May 15 06:17:00 UTC 2025</p>
+  </footer>
+</body>
+</html>
